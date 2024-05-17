@@ -1,13 +1,23 @@
-from sqlalchemy import create_engine, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+class User(BaseModel):
+    id: int
+    username: str
+    password: str
+    email: str
+    phone_number: str
+    created_at: datetime
 
-Base = declarative_base()
+    @classmethod
+    def from_query_result(cls, id: int, username: str, password: str, email: str, phone_number: str,
+                          created_at: datetime):
+        return cls(
+            id=id,
+            username=username,
+            password=password,
+            email=email,
+            phone_number=phone_number,
+            created_at=created_at
+        )
