@@ -7,6 +7,11 @@
 # -- -----------------------------------------------------
 # -- Schema mydb
 # -- -----------------------------------------------------
+#
+# -- -----------------------------------------------------
+# -- Schema mydb
+# -- -----------------------------------------------------
+# CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
 # -- -----------------------------------------------------
 # -- Schema virtual_wallet_schema
 # -- -----------------------------------------------------
@@ -15,7 +20,7 @@
 # -- Schema virtual_wallet_schema
 # -- -----------------------------------------------------
 # CREATE SCHEMA IF NOT EXISTS `virtual_wallet_schema` ;
-# USE `virtual_wallet_schema` ;
+# USE `mydb` ;
 #
 # -- -----------------------------------------------------
 # -- Table `virtual_wallet_schema`.`users`
@@ -28,6 +33,7 @@
 #   `phone_number` VARCHAR(10) NOT NULL,
 #   `is_admin` TINYINT(4) NOT NULL DEFAULT 0,
 #   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+#   `amount` FLOAT NULL,
 #   PRIMARY KEY (`id`),
 #   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
 #   UNIQUE INDEX `username_UNIQUE` (`username` ASC) VISIBLE,
@@ -35,6 +41,35 @@
 #   UNIQUE INDEX `phone_number_UNIQUE` (`phone_number` ASC) VISIBLE)
 # ENGINE = InnoDB;
 #
+#
+# -- -----------------------------------------------------
+# -- Table `mydb`.`recurring_transactions`
+# -- -----------------------------------------------------
+# CREATE TABLE IF NOT EXISTS `mydb`.`recurring_transactions` (
+#   `id` INT NOT NULL AUTO_INCREMENT,
+#   `sender_id` INT(11) NOT NULL,
+#   `receiver_id` INT(11) NOT NULL,
+#   `amount` FLOAT NOT NULL,
+#   `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP(),
+#   `recurring_time` DATETIME NULL,
+#   `status` ENUM('pending', 'confirmed', 'denied') NOT NULL DEFAULT 'pending',
+#   INDEX `fk_recuring_transactions_users_idx` (`sender_id` ASC) VISIBLE,
+#   PRIMARY KEY (`id`),
+#   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
+#   INDEX `fk_recurring_transactions_users1_idx` (`receiver_id` ASC) VISIBLE,
+#   CONSTRAINT `fk_recuring_transactions_users`
+#     FOREIGN KEY (`sender_id`)
+#     REFERENCES `virtual_wallet_schema`.`users` (`id`)
+#     ON DELETE NO ACTION
+#     ON UPDATE NO ACTION,
+#   CONSTRAINT `fk_recurring_transactions_users1`
+#     FOREIGN KEY (`receiver_id`)
+#     REFERENCES `virtual_wallet_schema`.`users` (`id`)
+#     ON DELETE NO ACTION
+#     ON UPDATE NO ACTION)
+# ENGINE = InnoDB;
+#
+# USE `virtual_wallet_schema` ;
 #
 # -- -----------------------------------------------------
 # -- Table `virtual_wallet_schema`.`cards`
@@ -62,13 +97,17 @@
 # -- Table `virtual_wallet_schema`.`contacts`
 # -- -----------------------------------------------------
 # CREATE TABLE IF NOT EXISTS `virtual_wallet_schema`.`contacts` (
-#   `id` INT(11) NOT NULL AUTO_INCREMENT,
+#   `current_user_id` INT(11) NOT NULL,
 #   `contact_name_id` INT(11) NOT NULL,
-#   PRIMARY KEY (`id`),
-#   UNIQUE INDEX `id_UNIQUE` (`id` ASC) VISIBLE,
 #   INDEX `fk_contacts_users1_idx` (`contact_name_id` ASC) VISIBLE,
+#   INDEX `fk_contacts_users2_idx` (`current_user_id` ASC) VISIBLE,
 #   CONSTRAINT `fk_contacts_users1`
 #     FOREIGN KEY (`contact_name_id`)
+#     REFERENCES `virtual_wallet_schema`.`users` (`id`)
+#     ON DELETE NO ACTION
+#     ON UPDATE NO ACTION,
+#   CONSTRAINT `fk_contacts_users2`
+#     FOREIGN KEY (`current_user_id`)
 #     REFERENCES `virtual_wallet_schema`.`users` (`id`)
 #     ON DELETE NO ACTION
 #     ON UPDATE NO ACTION)
