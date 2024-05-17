@@ -7,5 +7,6 @@ key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxj
 # Create Supabase client
 supabase_data = create_client(url, key)
 
-
-
+# Query with schema specified
+response = supabase_data.table('users').select('*').execute()
+print(response)
