@@ -1,0 +1,10 @@
+#.gitignore #Ignore it itselft
+.idea/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+tst.py
+.vscode
