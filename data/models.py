@@ -2,6 +2,23 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 
+class Transaction(BaseModel):
+    id: int
+    created_at: datetime
+    amount: float 
+    status: str
+    category: str
+
+    @classmethod
+    def from_query_result(cls, id, created_at, amount, status, category):
+        return cls(
+            id=id,
+            created_at=created_at,
+            amount=amount,
+            status=status,
+            category=category
+
+
 class User(BaseModel):
     id: int
     username: str
@@ -20,4 +37,5 @@ class User(BaseModel):
             email=email,
             phone_number=phone_number,
             created_at=created_at
+
         )
