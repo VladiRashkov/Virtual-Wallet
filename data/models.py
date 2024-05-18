@@ -1,13 +1,20 @@
-from sqlalchemy import create_engine, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from pydantic import BaseModel
+from datetime import datetime
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
-# SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+class Transaction(BaseModel):
+    id: int
+    created_at: datetime
+    amount: float 
+    status: str
+    category: str
 
-Base = declarative_base()
+    @classmethod
+    def from_query_result(cls, id, created_at, amount, status, category):
+        return cls(
+            id=id,
+            created_at=created_at,
+            amount=amount,
+            status=status,
+            category=category
+        )

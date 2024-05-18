@@ -8,5 +8,5 @@ key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxj
 supabase_data = create_client(url, key)
 
 # Query with schema specified
-response = supabase_data.table('users').select('*').execute()
-print(response)
+
+# response_transactions = supabase_data.table()
