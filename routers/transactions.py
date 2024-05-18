@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 from services import transactions_services
 from common.authorization import get_current_user
 
-# 1. Transaction history after a regular user has logged in
+# 1. Transaction history after a regular user has logged in  -- sending part, reciever part in progress
 # ->admin cannot check the transaction history!
-# 2. Make transaction
-# 3. Each transaction has to be put through a confirmation step -> accept or decline
+# 2. Make transaction -- done
+# 3. Each transaction has to be put through a confirmation step -> accept or decline -- consult with team
 # 4. Receiver has to accept ot decline transaction
 # 5. Add money to wallet
 
@@ -26,3 +26,9 @@ def get_transactions(sort: str | None = None, sender_id: int = Depends(get_curre
 def create_transaction(receiver_id: int, amount: float, category:str, sender_id: int = Depends(get_current_user)):
     result = transactions_services.transfer_money(sender_id, receiver_id, amount, category)
     return {'message': result}
+
+@transaction_router.put('/add')
+def add_money(deposit:float, user: int=Depends(get_current_user)):
+    result = transactions_services.deposit_money(user,deposit)
+    return {'message':result}
+    
