@@ -23,6 +23,6 @@ def get_transactions(sort: str | None = None, sender_id: int = Depends(get_curre
 
 
 @transaction_router.post('/create_transaction')
-def create_transaction(receiver_id: int, amount: float, sender_id: int = Depends(get_current_user)):
-    result = transactions_services.transfer_money(sender_id, receiver_id, amount)
+def create_transaction(receiver_id: int, amount: float, category:str, sender_id: int = Depends(get_current_user)):
+    result = transactions_services.transfer_money(sender_id, receiver_id, amount, category)
     return {'message': result}
