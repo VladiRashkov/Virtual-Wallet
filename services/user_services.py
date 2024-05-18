@@ -66,10 +66,15 @@ def _find_user_by_email(email):
     # return ORM object
     data = query.table('users').select('id', 'username', 'password', 'email', 'phone_number', 'created_at').eq('email',
                                                                                                                email).execute()
+
     # convert data ORM object to list with dictionary in it
     data_lst = data.data
 
-    # access dictionary from the list
+    # check if data_lst is empty, if it's empty, that's because user with this email is not found and raise exception
+
+    if not data_lst:
+        return
+        # access dictionary from the list
     data_dict = data_lst[0]
 
     return User(
@@ -85,6 +90,13 @@ def _find_user_by_email(email):
 def try_login(email: str, password: str):
     user = _find_user_by_email(email)
 
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail=f'Email address: {email} is not valid! Please enter a valid email address!')
+
     hashed_password = get_password_hash(password)
 
-    return user if user and user.password == hashed_password else None
+    if user.password != hashed_password:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Please, enter a valid password!')
+
+    return user
