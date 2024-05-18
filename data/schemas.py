@@ -20,3 +20,17 @@ class UserOut(BaseModel):
 class UserLogin(BaseModel):
     email: str
     password: str
+
+
+class UpdateAmount(BaseModel):
+    amount: float
+
+
+class AmountOut(BaseModel):
+    message: str
+    old_balance: float
+    new_balance: float
+
+
+class AccountBalanceOut(BaseModel):
+    balance: float
