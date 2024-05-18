@@ -36,6 +36,11 @@ def transfer_money(sender_id: int, receiver_id: int, amount: float, category: st
     if sender_balance < amount:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail='Insufficient balance')
+        
+    confirm = input(f"Are you sure you want to transfer {amount} to user with ID {receiver_id}? (yes/no): ")
+    if confirm.lower() != "yes":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail='Transfer canceled by user')
 
     new_sender_balance = sender_balance - amount
     new_receiver_balance = receiver_balance + amount
@@ -49,9 +54,29 @@ def transfer_money(sender_id: int, receiver_id: int, amount: float, category: st
         'sender_id': sender_id,
         'receiver_id': receiver_id,
         'amount': amount,
+        'status':"confirmed",
         'category': category
     }
 
     query.table('transactions').insert(transaction_data).execute()
 
     return 'Successful'
+
+
+def deposit_money(id:float, sum:int):
+    user = query.table('users').select('amount').eq('id',id).execute()
+    
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='The user was not found')
+    user_data = user.data
+    user_amount = user_data[0]['amount']
+    
+    if sum<=0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='The sum has to be a positive number')
+    
+    new_balance = user_amount+sum
+    
+    return f'The new balance is {new_balance}.'
+    
+    
