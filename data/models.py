@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from datetime import datetime
 
 
@@ -16,7 +16,7 @@ class Transaction(BaseModel):
             created_at=created_at,
             amount=amount,
             status=status,
-            category=category
+            category=category)
 
 
 class User(BaseModel):
