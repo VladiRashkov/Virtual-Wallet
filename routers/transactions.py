@@ -31,4 +31,9 @@ def create_transaction(receiver_id: int, amount: float, category:str, sender_id:
 def add_money(deposit:float, user: int=Depends(get_current_user)):
     result = transactions_services.deposit_money(user,deposit)
     return {'message':result}
+
+@transaction_router.put('/withdraw')
+def extract_money(money:float, user: int=Depends(get_current_user)):
+    result = transactions_services.withdraw_money(user, money)
+    return result
     
