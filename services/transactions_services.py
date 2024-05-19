@@ -63,20 +63,45 @@ def transfer_money(sender_id: int, receiver_id: int, amount: float, category: st
     return 'Successful'
 
 
-def deposit_money(id:float, sum:int):
+def deposit_money(id:int, sum:float):
     user = query.table('users').select('amount').eq('id',id).execute()
     
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='The user was not found')
-    user_data = user.data
-    user_amount = user_data[0]['amount']
+    user_data = user.data[0]
+    user_amount = user_data['amount']
     
     if sum<=0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='The sum has to be a positive number')
     
     new_balance = user_amount+sum
     
-    return f'The new balance is {new_balance}.'
+    update_balance = query.table('users').update({'amount': new_balance}).eq('id', id).execute()
+    
+    return f'The new balance is {update_balance}.'
+
+def withdraw_money(id:int, sum:float):
+    user = query.table('users').select('amount').eq('id',id).execute()
+    
+    if not user.data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='The user was not found')
+    user_data = user.data[0]
+    user_amount = user_data['amount']
+    
+    if sum<=0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='The sum has to be a positive number')
+    
+    if user_amount<sum:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail = 'Insufficient balance')
+    
+    new_balance = user_amount-sum
+    
+    update_result = query.table('users').update({'amount': new_balance}).eq('id', id).execute()
+    
+   
+    
+    return f'The new balance is {update_result}.'
     
     
