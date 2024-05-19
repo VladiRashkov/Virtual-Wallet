@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from services import transactions_services
 from common.authorization import get_current_user
+from typing import Optional
 
 # 1. Transaction history after a regular user has logged in  -- sending part, reciever part in progress
 # ->admin cannot check the transaction history!
@@ -17,8 +18,10 @@ transaction_router = APIRouter(prefix='/transactions')
 
 
 @transaction_router.get('/')  # will require token of the user
-def get_transactions(sort: str | None = None, sender_id: int = Depends(get_current_user)):
-    transactions = transactions_services.all_user_transactions(sender_id, sort)
+def get_transactions(sort_by: Optional[str] = Query(None, pattern='^(created_at|amount)$'),
+                     order: Optional[str] = Query(None, pattern='^(asc|desc)$'),
+                     sender_id: int = Depends(get_current_user)):
+    transactions = transactions_services.all_user_transactions(sender_id, sort_by,order)
     return transactions
 
 

@@ -1,8 +1,9 @@
 from data.connection import query
 from fastapi import HTTPException, status
+from typing import Optional
 
 
-def all_user_transactions(sender_id: int, sort: str | None):
+def all_user_transactions(sender_id: int, sort_by: Optional[str] = None, order:Optional[str] = None):
     """This function retrieves all transactions made by a user with the specified sender ID. If no transactions are found,
     it raises an HTTP exception with a 404 Not Found status code."""
 
@@ -13,6 +14,10 @@ def all_user_transactions(sender_id: int, sort: str | None):
     if not transactions:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'User with id {sender_id} has no transactions!')
+        
+    if sort_by:
+        reverse = (order=="desc")
+        transactions.sort(key=lambda x: x[sort_by],reverse=reverse)
     return transactions
 
 
