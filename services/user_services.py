@@ -20,32 +20,6 @@ def get_account_balance(user_id: int) -> AccountBalanceOut:
     return AccountBalanceOut(balance=balance['amount'])
 
 
-def update_account_balance(amount: float, user_id: int) -> AmountOut:
-    """This function update account balance of logged user.
-    If amount is negative number or equal to 0, it raises exception!"""
-    if amount <= 0:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid amount!')
-
-    # get account balance as obj
-    old_balance_obj = get_account_balance(user_id)
-
-    # get account balance as float
-    old_balance = old_balance_obj.balance
-
-    # sum old balance + amount
-    new_balance = old_balance + amount
-
-    # update account balance
-    balance_data = query.table('users').update({"amount": new_balance}).eq('id', user_id).execute()
-    balance_list = balance_data.data
-    balance_dict = balance_list[0]
-
-    # get updated account balance
-    balance = balance_dict['amount']
-
-    return AmountOut(message="Balance updated!", old_balance=old_balance, new_balance=balance)
-
-
 def _is_valid_password(password: str) -> tuple[bool, str]:
     """This function checks if a given password meets specific security requirements.
     It returns a boolean indicating the validity of the password and a message detailing the result."""
