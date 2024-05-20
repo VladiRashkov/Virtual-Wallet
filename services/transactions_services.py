@@ -1,19 +1,25 @@
 from data.connection import query
 from fastapi import HTTPException, status
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 
-def all_user_transactions(sender_id: int, sort_by: Optional[str] = None, order:Optional[str] = None):
+def all_user_transactions(user_id: int, transaction_type: str = "all", sort_by: Optional[str] = None, order: Optional[str] = None) -> List[Dict[str, Any]]:
     """This function retrieves all transactions made by a user with the specified sender ID. If no transactions are found,
     it raises an HTTP exception with a 404 Not Found status code."""
 
-    data = query.table('transactions').select(
-        '*').eq('sender_id', sender_id).execute()
-    transactions = data.data
-
+    transactions = []
+    
+    if transaction_type in ['sent', 'all']:
+        sent_data = query.table('transactions').select('*').eq('sender_id', user_id).execute()
+        transactions.extend(sent_data.data)
+        
+    if transaction_type in ["received", "all"]:
+        received_data = query.table('transactions').select('*').eq('receiver_id', user_id).execute()
+        transactions.extend(received_data.data)
+        
     if not transactions:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'User with id {sender_id} has no transactions!')
+                            detail=f'User with id {user_id} has no transactions!')
         
     if sort_by:
         reverse = (order=="desc")
@@ -21,7 +27,7 @@ def all_user_transactions(sender_id: int, sort_by: Optional[str] = None, order:O
     return transactions
 
 
-def transfer_money(sender_id: int, receiver_id: int, amount: float, category: str):  # TODO add category
+def transfer_money(sender_id: int, receiver_id: int, amount: float, category: str):  
     sender = query.table('users').select(
         'amount').eq('id', sender_id).execute()
     receiver = query.table('users').select(
@@ -63,9 +69,9 @@ def transfer_money(sender_id: int, receiver_id: int, amount: float, category: st
         'category': category
     }
 
-    query.table('transactions').insert(transaction_data).execute()
+    insert_transaction = query.table('transactions').insert(transaction_data).execute()
 
-    return 'Successful'
+    return 'Successful', insert_transaction
 
 
 def deposit_money(id:int, sum:float):
@@ -82,7 +88,13 @@ def deposit_money(id:int, sum:float):
     
     new_balance = user_amount+sum
     
-    update_balance = query.table('users').update({'amount': new_balance}).eq('id', id).execute()
+    update_balance_data = query.table('users').update({'amount': new_balance}).eq('id', id).execute()
+    update_balance_list = update_balance_data.data
+    update_balance = update_balance_list[0]["amount"]
+    category = 'atm'
+    transfer_money(id,id,sum,category)
+    
+    query.table('transactions').update() #TODO
     
     return f'The new balance is {update_balance}.'
 
