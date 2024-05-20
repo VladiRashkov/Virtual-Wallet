@@ -92,9 +92,11 @@ def deposit_money(id:int, sum:float):
     update_balance_list = update_balance_data.data
     update_balance = update_balance_list[0]["amount"]
     category = 'atm'
-    transfer_money(id,id,sum,category)
+    transaction_data = transfer_money(id,id,sum,category)[1]
+    transaction_list = transaction_data.data 
+    transaction_id = transaction_list[0]['id']
     
-    query.table('transactions').update() #TODO
+    query.table('transactions').update({'is_accepted': True}).eq('id',transaction_id).execute() #TODO
     
     return f'The new balance is {update_balance}.'
 
