@@ -34,3 +34,17 @@ class AmountOut(BaseModel):
 
 class AccountBalanceOut(BaseModel):
     balance: float
+
+
+class DepositAmount(BaseModel):
+    deposit_amount: float
+
+
+class WithdrawMoney(BaseModel):
+    withdraw_sum: float
+
+
+class CreateTransaction(BaseModel):
+    receiver_id: int
+    amount: float
+    category: str
