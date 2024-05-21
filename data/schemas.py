@@ -48,3 +48,7 @@ class CreateTransaction(BaseModel):
     receiver_id: int
     amount: float
     category: str
+
+
+class ConfirmOrDecline(BaseModel):
+    confirm_or_decline: str
