@@ -1,11 +1,11 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, date
 
 
 class Transaction(BaseModel):
     id: int
     created_at: datetime
-    amount: float 
+    amount: float
     status: str
     category: str
 
@@ -38,4 +38,24 @@ class User(BaseModel):
             phone_number=phone_number,
             created_at=created_at
 
+        )
+
+
+class Card(BaseModel):
+    id: int
+    user_id: int
+    type: str
+    expiration_date: str
+    cvv: int
+    number: str
+
+    @classmethod
+    def from_query_result(cls, id: int, user_id: int, type: str, expiration_date: str, cvv: int, number: str):
+        return cls(
+            id=id,
+            user_id=user_id,
+            type=type,
+            expiration_date=expiration_date,
+            cvv=cvv,
+            number=number
         )
