@@ -3,7 +3,8 @@ from services import transactions_services
 from common.authorization import get_current_user
 from typing import Optional, List, Dict, Any
 from data.schemas import DepositAmount, WithdrawMoney, CreateTransaction, ConfirmOrDecline
-
+from datetime import date
+from data.models import Transaction
 # 1. Transaction history after a regular user has logged in  -- sending part, reciever part in progress
 # ->admin cannot check the transaction history!
 # 2. Make transaction -- done
@@ -60,3 +61,23 @@ def extract_money(withdraw_sum: WithdrawMoney, user: int = Depends(get_current_u
 def confirm_transaction(confirm_or_decline: ConfirmOrDecline, transaction_id: int, user: int = Depends(get_current_user)):
     result = transactions_services.confirm_transaction(confirm_or_decline.confirm_or_decline, transaction_id, user)
     return result
+
+#NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
+@transaction_router.get('/filter', response_model=List[Transaction])
+def filter_transactions_endpoint(
+    start_date: Optional[date] = Query(None, description="Start date in the format YYYY-MM-DD"),
+    end_date: Optional[date] = Query(None, description="End date in the format YYYY-MM-DD"),
+    sender_id: Optional[int] = Query(None),
+    receiver_id: Optional[int] = Query(None),
+    transaction_type: str = Query('all', pattern='^(sent|received|all)$'),
+    user_id: int = Depends(get_current_user)
+):
+    transactions = transactions_services.filter_transactions(
+        user_id=user_id,
+        start_date=start_date,
+        end_date=end_date,
+        sender_id=sender_id,
+        receiver_id=receiver_id,
+        transaction_type=transaction_type
+    )
+    return transactions
