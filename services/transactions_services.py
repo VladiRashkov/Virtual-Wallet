@@ -2,33 +2,73 @@ from data.connection import query
 from fastapi import HTTPException, status
 from typing import Optional, List, Dict, Any
 from services.user_services import get_account_balance
-from data.schemas import AmountOut, WithdrawMoney
+from data.schemas import AmountOut
 
 
 # TODO make a confirmation step when creating a transaction! (maybe new endpoint)
 
-def all_user_transactions(user_id: int, transaction_type: str = "all", sort_by: Optional[str] = None,
-                          order: Optional[str] = None) -> List[Dict[str, Any]]:
-    """This function retrieves all transactions made by a user with the specified sender ID. If no transactions are found,
-    it raises an HTTP exception with a 404 Not Found status code."""
+def all_user_transactions(user_id: int, transaction_type: str = None, sort_by: Optional[str] = 'created_at',
+                          order: Optional[str] = 'desc', transaction_status: str = 'all') -> List[
+                                                                                                 object] | HTTPException:
+    """Retrieves all transactions for a user by sender ID, including sent, received, and filtered by transaction status.
+    Ensures no duplicate transactions by checking for deposits where sender_id and receiver_id are the same. Raises a 404
+    HTTP exception if no transactions are found."""
 
     transactions = []
 
-    if transaction_type in ['sent', 'all']:
+    # if all query params are default, this will be the output data
+    sender_data = query.table('transactions').select('*').eq('sender_id', user_id).execute()
+    receiver_data = query.table('transactions').select('*').eq('receiver_id', user_id).execute()
+    transactions.extend(sender_data.data)
+    transactions.extend(receiver_data.data)
+
+    # get transactions if the logged user is sender of the transaction
+    if transaction_type == 'sent':
+        transactions.clear()
         sent_data = query.table('transactions').select('*').eq('sender_id', user_id).execute()
         transactions.extend(sent_data.data)
 
-    if transaction_type in ["received", "all"]:
+    # get transactions if the logged user is receiver of the transaction
+    elif transaction_type == 'received':
+        transactions.clear()
         received_data = query.table('transactions').select('*').eq('receiver_id', user_id).execute()
         transactions.extend(received_data.data)
 
+    # get transaction status of the transactions which logged user SENT
+    if transaction_status in ['confirmed', 'pending', 'declined']:
+        transactions.clear()
+        transactions_data = query.table('transactions').select('*').eq('status', transaction_status).eq(
+            'sender_id',
+            user_id).execute()
+        transactions.extend(transactions_data.data)
+
     if not transactions:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'User with id {user_id} has no transactions!')
+                            detail=f'User with id {user_id} has no {transaction_status} transactions!')
+
+    # Here we check if transactions list has duplicate transactions.
+    # If this check does not exist when retrieving transactions from the ATM,
+    # duplicates will occur. Our logic is to retrieve transactions using sender_
+    # id and receiver_id, but when there is a deposit from the ATM, both sender_id
+    # and receiver_id will be the same.
+    unique_transactions = []
+
+    # set does not allow to have multiple values in it
+    transaction_ids = set()
+    for transaction in transactions:
+        # here we check if transaction id exists in the set
+        if transaction['id'] not in transaction_ids:
+            # if this transaction id is not in the set, we can append the transaction to unique_transactions
+            unique_transactions.append(transaction)
+            # and add the id in the set
+            transaction_ids.add(transaction['id'])
+
+    transactions = unique_transactions
 
     if sort_by:
         reverse = (order == "desc")
         transactions.sort(key=lambda x: x[sort_by], reverse=reverse)
+
     return transactions
 
 
@@ -139,4 +179,40 @@ def withdraw_money(withdraw_sum: float, logged_user_id: int):
 
     return AmountOut(message="Balance updated!", old_balance=user_balance, new_balance=new_balance)
 
+
+    return f'The new balance is {update_result}.'
+
+
+def confirm_transaction(confirm_or_decline: str, transaction_id: int, logged_user_id: int):
+    transaction_data = query.table('transactions').select('*').eq('id', transaction_id).eq('sender_id',
+                                                                                           logged_user_id).eq('status',
+                                                                                                              'pending').execute()
+
+    if not transaction_data.data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'Transaction with id: {transaction_id} is not found! You can confirm only pending '
+                                   f'transactions!')
+
+    transaction = transaction_data.data[0]
+    transaction_amount = transaction['amount']
+    sender_id = transaction['sender_id']
+
+    sender_account_balance = get_account_balance(sender_id).balance
+
+    confirm_or_deny_list = ['confirm', 'deny']
+
+    if confirm_or_decline not in confirm_or_deny_list:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail='You can only "confirm" or "deny" the transaction!')
+
+    if confirm_or_decline == 'decline':
+        new_sender_account_balance = sender_account_balance + transaction_amount
+        query.table('users').update({'amount': new_sender_account_balance}).eq('id', sender_id).execute()
+        query.table('transactions').update({'status': 'declined'}).eq('id', transaction_id).execute()
+        return f'Transaction with id: {transaction_id} was DECLINED!'
+    elif confirm_or_decline == 'confirm':
+        query.table('transactions').update({'status': 'confirmed'}).eq('id', transaction_id).execute()
+        return f'Transaction with id: {transaction_id} was CONFIRMED!'
+
     
+

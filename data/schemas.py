@@ -53,6 +53,10 @@ class CreateTransaction(BaseModel):
     category: str
 
 
+
+class ConfirmOrDecline(BaseModel):
+    confirm_or_decline: str
+      
 CardType = Annotated[str, Field(regex=r'^(credit|debit)$')]
 ExpirationDate = Annotated[str, Field(regex=r'^\d{4}$')]
 CardNumber = Annotated[str, Field(min_length=16, max_length=16, regex=r'^\d{16}$')]
