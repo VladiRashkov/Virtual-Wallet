@@ -3,7 +3,7 @@ import services.user_services
 from common.authorization import create_token, get_current_user
 from security.password_hashing import get_password_hash, verify_password
 from services import user_services
-from data.schemas import UserCreate, UserLogin, UpdateAmount
+from data.schemas import UserCreate, UserLogin, UpdateAmount, UpdateProfile
 from fastapi import Depends
 
 users_router = APIRouter(prefix='/users')
@@ -29,3 +29,16 @@ def login(user_login: UserLogin):
     access_token = create_token(data={"user_id": user.id})
 
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@users_router.put('/profile/update')
+def update_profile(update_profile_params: UpdateProfile, user: int = Depends(get_current_user)):
+    result = user_services.update_profile(update_profile_params.password, update_profile_params.email,
+                                          update_profile_params.phone_number, user)
+    return result
+
+
+@users_router.get('/profile')
+def get_logged_user(user: int = Depends(get_current_user)):
+    result = user_services.get_logged_user(user)
+    return result
