@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from services import transactions_services
 from common.authorization import get_current_user
 from typing import Optional, List, Dict, Any
-from data.schemas import DepositAmount, WithdrawMoney, CreateTransaction, ConfirmOrDecline
+from data.schemas import DepositAmount, WithdrawMoney, CreateTransaction, ConfirmOrDecline, AcceptTransaction
 
 # 1. Transaction history after a regular user has logged in  -- sending part, reciever part in progress
 # ->admin cannot check the transaction history!
@@ -57,6 +57,13 @@ def extract_money(withdraw_sum: WithdrawMoney, user: int = Depends(get_current_u
 
 
 @transaction_router.put('/confirm/{transaction_id}')
-def confirm_transaction(confirm_or_decline: ConfirmOrDecline, transaction_id: int, user: int = Depends(get_current_user)):
+def confirm_transaction(confirm_or_decline: ConfirmOrDecline, transaction_id: int,
+                        user: int = Depends(get_current_user)):
     result = transactions_services.confirm_transaction(confirm_or_decline.confirm_or_decline, transaction_id, user)
+    return result
+
+
+@transaction_router.put('/accept/{transaction_id}')
+def accept_transaction(transaction_id: int, acceptation: AcceptTransaction, user: int = Depends(get_current_user)):
+    result = transactions_services.accept_transaction(transaction_id, acceptation.acceptation, user)
     return result
