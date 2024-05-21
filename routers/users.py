@@ -15,16 +15,10 @@ def get_account_balance(user_id: int = Depends(get_current_user)):
     return balance
 
 
-@users_router.put('/balance')
-def update_account_balance(amount: UpdateAmount, user_id: int = Depends(get_current_user)):
-    new_balance = user_services.update_account_balance(amount.amount, user_id)
-    return new_balance
-
-
 @users_router.post('/register', status_code=status.HTTP_201_CREATED)
 def register(user_create: UserCreate):
     new_user = user_services.create(user_create.username, user_create.password, user_create.email,
-                                  user_create.phone_number)
+                                    user_create.phone_number)
     return new_user
 
 
