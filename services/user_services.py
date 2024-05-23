@@ -1,23 +1,16 @@
 from data.connection import query
-from data.schemas import UserOut, AmountOut, AccountBalanceOut
+from data.schemas import UserOut
 from fastapi import HTTPException, status
 from re import search
 from security.password_hashing import get_password_hash
-from data.models import User
+from data.helpers import get_account_balance, find_user_by_email, find_user_by_id, find_user_by_username, \
+    find_user_by_phone_number, \
+    PHONE_NUMBER_ERROR, EMAIL_ERROR, USERNAME_ERROR, ID_ERROR, pagination_offset
 
 
-def get_account_balance(user_id: int) -> AccountBalanceOut:
-    """This function checks account balance of logged user"""
-    data = query.table('users').select('amount').eq('id', user_id).execute()
-
-    # convert ORM object to list with dictionary
-    balance_list = data.data
-
-    # convert balance_list to dictionary
-    balance = balance_list[0]
-
-    # return balance as dictionary
-    return AccountBalanceOut(balance=balance['amount'])
+def get_user_balance(logged_user_id):
+    user_balance = get_account_balance(logged_user_id)
+    return user_balance
 
 
 def _is_valid_password(password: str) -> tuple[bool, str]:
@@ -48,14 +41,14 @@ def create(username: str, password: str, email: str, phone_number: str) -> UserO
     """This function creates a new user with the specified username, password, email, and phone number.
     It validates the input data and raises HTTP exceptions if any validation fails."""
 
-    if _find_user_by_email(email):
+    if find_user_by_email(email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail='User with this email is ALREADY registered!')
 
     # If phone number is not equal to 10 symbols,
     # it raises error as result of the function (see how function is implemented).
     # Here we check if phone number already exists, it raises error
-    if _find_user_by_phone_number(phone_number):
+    if find_user_by_phone_number(phone_number):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail='User with this phone number is ALREADY registered!')
 
@@ -94,73 +87,19 @@ def create(username: str, password: str, email: str, phone_number: str) -> UserO
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_message)
 
 
-def _find_user_by_email(email) -> User | None:
-    """This function retrieves a user record from the database by the specified email address.
-    It queries the 'users' table for a matching email and returns a User object populated with the user's details if found.
-    If no user is found with the given email, the function returns None."""
-
-    # return ORM object
-    data = query.table('users').select('id', 'username', 'password', 'email', 'phone_number', 'created_at').eq('email',
-                                                                                                               email).execute()
-
-    # convert data ORM object to list with dictionary in it
-    data_lst = data.data
-
-    # check if data_lst is empty, if it's empty, that's because user with this email is not found and return none
-
-    if not data_lst:
-        return
-        # access dictionary from the list
-    data_dict = data_lst[0]
-
-    return User(
-        id=data_dict['id'],
-        username=data_dict['username'],
-        password=data_dict['password'],
-        email=data_dict['email'],
-        phone_number=data_dict['phone_number'],
-        created_at=data_dict['created_at']
-    )
-
-
-def _find_user_by_phone_number(phone_number: str) -> User | None:
-    """This function retrieves a user record from the database by the specified phone number.
-        It queries the 'users' table for a matching phone number and
-        returns a User object populated with the user's details if found.
-        If no user is found with the given phone number, the function returns None."""
-
-    user_data = query.table('users').select('*').eq('phone_number', phone_number).execute()
-
-    if len(phone_number) != 10:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Phone number must be EXACTLY 10 symbols!')
-
-    if not user_data.data:
-        return
-
-    user = user_data.data[0]
-
-    return User(
-        id=user['id'],
-        username=user['username'],
-        password=user['password'],
-        email=user['email'],
-        phone_number=user['phone_number'],
-        created_at=user['created_at']
-    )
-
-
-def try_login(email: str, password: str) -> User | HTTPException:
+def try_login(email: str, password: str) -> UserOut | HTTPException:
     """This function attempts to log in a user with the provided email address and password.
     If the email address or password is invalid,
     it raises an HTTP exception with a 401 Unauthorized status code."""
 
-    # if email is wrong, return none
-    user = _find_user_by_email(email)
-
-    # check if user exists
+    user = find_user_by_email(email)
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail=f'Email address: {email} is not valid! Please enter a valid email address!')
+        raise EMAIL_ERROR
+
+    # check if user registered -> if admin confirmed his registration
+    if not user.is_registered:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='User registration is not confirmed already by Admin, try again later!')
 
     hashed_password = get_password_hash(password)
 
@@ -168,7 +107,8 @@ def try_login(email: str, password: str) -> User | HTTPException:
     if user.password != hashed_password:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Please, enter a valid password!')
 
-    return user
+    return UserOut(id=user.id, username=user.username, email=user.email, phone_number=user.phone_number,
+                   created_at=user.created_at)
 
 
 def update_profile(password: str, email: str, phone_number: str, logged_user_id: int) -> str | HTTPException:
@@ -177,11 +117,14 @@ def update_profile(password: str, email: str, phone_number: str, logged_user_id:
         If validation passes, it updates the user's credentials in the database. Raises HTTP exceptions
         for invalid inputs or if the new credentials are the same as the current ones."""
 
-    current_user_data = query.table('users').select('*').eq('id', logged_user_id).execute()
-    current_user = current_user_data.data[0]
-    current_user_password = current_user['password']
-    current_user_email = current_user['email']
-    current_user_phone_number = current_user['phone_number']
+    current_user = find_user_by_id(logged_user_id)
+
+    if current_user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You CANNOT change credentials of ADMIN!')
+
+    current_user_password = current_user.password
+    current_user_email = current_user.email
+    current_user_phone_number = current_user.phone_number
 
     hashed_pass = get_password_hash(password)
 
@@ -224,10 +167,133 @@ def update_profile(password: str, email: str, phone_number: str, logged_user_id:
     return 'Credentials updated!'
 
 
-def get_logged_user(logged_user_id: int) -> UserOut:
-    logged_user_data = query.table('users').select('*').eq('id', logged_user_id).execute()
-    logged_user = logged_user_data.data[0]
+def get_logged_user(logged_user_id: int) -> UserOut | HTTPException:
+    """This function retrieves information of current user!"""
+    logged_user = find_user_by_id(logged_user_id)
 
     # it does not show password for security purposes
-    return UserOut(id=logged_user['id'], username=logged_user['username'], email=logged_user['email'],
-                   phone_number=logged_user['phone_number'], created_at=logged_user['created_at'])
+    return UserOut(id=logged_user.id, username=logged_user.username, email=logged_user.email,
+                   phone_number=logged_user.phone_number, created_at=logged_user.created_at)
+
+
+def get_all_users(logged_user_id: int, username: str = None, email: str = None, phone_number: str = None,
+                  registered: bool = None, page: int = 1):
+    """This function retrieves a list of all users from the database.
+    It ensures that only administrators can access this information and provides an option to
+    filter the users based on their registration status."""
+    records_per_page = 3
+    page_offset = pagination_offset(page, records_per_page)
+
+    if not _is_admin(logged_user_id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='Only ADMIN users can get information for all users!')
+
+    # get all users with pagination
+    users_data = query.table('users').select('*').range(page_offset, page_offset + records_per_page - 1).execute()
+    users = users_data.data
+
+    if phone_number:
+        user = find_user_by_phone_number(phone_number)
+        if not user:
+            raise PHONE_NUMBER_ERROR
+
+        return user
+
+    elif username:
+        user = find_user_by_username(username)
+        if not user:
+            raise USERNAME_ERROR
+
+        return user
+    elif email:
+        user = find_user_by_email(email)
+        if not user:
+            raise EMAIL_ERROR
+
+        return user
+
+    not_registered_users = []
+
+    registered_users = []
+
+    # check for not registered users
+    for user in users:
+        if user['is_registered'] is False:
+            not_registered_users.append(user)
+        else:
+            registered_users.append(user)
+
+    if registered is None:
+        return users
+
+    elif registered is False:
+        # check if not_registered users list is empty - if all users are registered
+        if not not_registered_users:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail='It does not have non registered users for now!')
+        return not_registered_users
+
+    elif registered is True:
+        # check if registered_users list is empty - if all users are not registered
+        if not registered_users:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail='It does not have registered users for now!')
+        return registered_users
+
+
+def confirm_user_registration(confirmation: bool, user_email: str, logged_user_id: int):
+    """This function is designed to handle the confirmation of a user's registration status.
+    This function ensures that only administrators can confirm user registrations,
+    checks if the user exists, and updates their registration status accordingly."""
+
+    if not _is_admin(logged_user_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail='Only ADMIN users can confirm user registration!')
+
+    user = find_user_by_email(user_email)
+    if not user:
+        raise EMAIL_ERROR
+
+    # check if user is already registered
+    if user.is_registered is True:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f'User with email: {user_email} is already registered!')
+
+    if confirmation not in [True, False]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Confirm: true/false')
+
+    if confirmation is True:
+        query.table('users').update({'is_registered': confirmation}).eq('id', user.id).execute()
+        return 'Confirmation for this user is successful!'
+
+    return 'Confirmation for this user is NOT successful!'
+
+
+def _is_admin(logged_user_id: int) -> bool:
+    admin_data = query.table('users').select('*').eq('id', logged_user_id).execute()
+    admin = admin_data.data[0]
+    is_admin = admin['is_admin']
+
+    if is_admin:
+        return True
+
+    return False
+
+
+def block_user(block_status: bool, user_id: int, logged_user_id: int):
+    is_admin = find_user_by_id(logged_user_id).is_admin
+
+    if not is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only ADMIN users can block user!')
+
+    user = find_user_by_id(user_id)
+
+    if not user:
+        raise ID_ERROR
+    if block_status in [True, False]:
+        if block_status is True:
+            query.table('users').update({'is_blocked': block_status}).eq('id', user_id).execute()
+        else:
+            query.table('users').update({'is_blocked': block_status}).eq('id', user_id).execute()
+
+    return f'Block status: {block_status} set successfully!'

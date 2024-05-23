@@ -22,14 +22,14 @@ from data.models import Transaction
 transaction_router = APIRouter(prefix='/transactions')
 
 
-@transaction_router.get('/')  # will require token of the user
-def get_transactions(sort_by: Optional[str] = Query('created_at', pattern='^(created_at|amount)$'),
-                     order: Optional[str] = Query('desc', pattern='^(asc|desc)$'),
-                     transaction_type: str = Query(None, pattern='^(sent|received)$'),
-                     transaction_status: str = Query('all', pattern='^(confirmed|pending|declined|all)$'),
-                     sender_id: int = Depends(get_current_user)):
-    transactions = transactions_services.all_user_transactions(sender_id, transaction_type, sort_by, order,
-                                                               transaction_status)
+@transaction_router.get('/user')  # will require token of the user
+def get_logged_user_transactions(sort_by: Optional[str] = Query('created_at', pattern='^(created_at|amount)$'),
+                                 order: Optional[str] = Query('desc', pattern='^(asc|desc)$'),
+                                 transaction_type: str = Query(None, pattern='^(sent|received)$'),
+                                 transaction_status: str = Query('all', pattern='^(confirmed|pending|declined|all)$'),
+                                 sender_id: int = Depends(get_current_user)):
+    transactions = transactions_services.get_logged_user_transactions(sender_id, transaction_type, sort_by, order,
+                                                                      transaction_status)
     return transactions
 
 
@@ -72,15 +72,16 @@ def accept_transaction(transaction_id: int, acceptation: AcceptTransaction, user
     result = transactions_services.accept_transaction(transaction_id, acceptation.acceptation, user)
     return result
 
-#NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
+
+# NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
 @transaction_router.get('/filter', response_model=List[Transaction])
 def filter_transactions_endpoint(
-    start_date: Optional[date] = Query(None, description="Start date in the format YYYY-MM-DD"),
-    end_date: Optional[date] = Query(None, description="End date in the format YYYY-MM-DD"),
-    sender_id: Optional[int] = Query(None),
-    receiver_id: Optional[int] = Query(None),
-    transaction_type: str = Query('all', pattern='^(sent|received|all)$'),
-    user_id: int = Depends(get_current_user)
+        start_date: Optional[date] = Query(None, description="Start date in the format YYYY-MM-DD"),
+        end_date: Optional[date] = Query(None, description="End date in the format YYYY-MM-DD"),
+        sender_id: Optional[int] = Query(None),
+        receiver_id: Optional[int] = Query(None),
+        transaction_type: str = Query('all', pattern='^(sent|received|all)$'),
+        user_id: int = Depends(get_current_user)
 ):
     transactions = transactions_services.filter_transactions(
         user_id=user_id,
@@ -92,3 +93,13 @@ def filter_transactions_endpoint(
     )
     return transactions
 
+
+@transaction_router.get('/{user_id}')
+def get_all_transactions(user_id: int, logged_user_id: int = Depends(get_current_user), page: int = 1,
+                         sent_or_received: str = None,
+                         start_date: Optional[str] = None,
+                         end_date: Optional[str] = None, direction: str = None,
+                         sort: str = Query(None, description="amount | created_at"), order: str = 'desc'):
+    result = transactions_services.get_all_transactions(user_id, logged_user_id, page, sent_or_received, start_date,
+                                                        end_date, direction, sort, order)
+    return result
