@@ -89,3 +89,16 @@ class CardUpdate(BaseModel):
 class Card(CardBase):
     id: int
     user_id: int
+
+
+class CreateRecurringTransaction(BaseModel):
+    receiver_id: int
+    amount: float
+    recurring_time: str  # e.g., 'daily', 'weekly', 'monthly'
+    
+    
+class UpdateRecurringTransaction(BaseModel):
+    receiver_id: int
+    amount: float
+    recurring_time: str
+    status: str
