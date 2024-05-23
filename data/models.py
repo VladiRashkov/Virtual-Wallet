@@ -49,17 +49,19 @@ class User(BaseModel):
     email: str
     phone_number: str
     created_at: datetime
+    is_registered: bool
 
     @classmethod
     def from_query_result(cls, id: int, username: str, password: str, email: str, phone_number: str,
-                          created_at: datetime):
+                          created_at: datetime, is_registered: bool):
         return cls(
             id=id,
             username=username,
             password=password,
             email=email,
             phone_number=phone_number,
-            created_at=created_at
+            created_at=created_at,
+            is_registered=is_registered
 
         )
 

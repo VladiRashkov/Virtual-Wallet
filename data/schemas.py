@@ -53,10 +53,10 @@ class CreateTransaction(BaseModel):
     category: str
 
 
-
 class ConfirmOrDecline(BaseModel):
     confirm_or_decline: str
-      
+
+
 CardType = Annotated[str, Field(regex=r'^(credit|debit)$')]
 ExpirationDate = Annotated[str, Field(regex=r'^\d{4}$')]
 CardNumber = Annotated[str, Field(min_length=16, max_length=16, regex=r'^\d{16}$')]
@@ -102,3 +102,34 @@ class UpdateRecurringTransaction(BaseModel):
     amount: float
     recurring_time: str
     status: str
+
+
+class AcceptTransaction(BaseModel):
+    acceptation: str
+
+
+class UpdateProfile(BaseModel):
+    password: str
+    email: str
+    phone_number: str
+
+
+class ConfirmUserRegistration(BaseModel):
+    confirm: bool
+
+
+class GetUser(BaseModel):
+    id: int
+    username: str
+    password: str
+    email: str
+    phone_number: str
+    is_admin: bool
+    created_at: datetime
+    amount: float
+    is_registered: bool
+    is_blocked: bool
+
+
+class BlockOrUnblock(BaseModel):
+    is_blocked: bool
