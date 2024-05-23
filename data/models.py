@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime, date
+from typing import Optional
 
 
 class Transaction(BaseModel):
@@ -17,7 +18,29 @@ class Transaction(BaseModel):
             amount=amount,
             status=status,
             category=category)
+        
+class RecurringTransaction(BaseModel):
+    id: int
+    sender_id:int
+    amount: float
+    receiver_id: int
+    created_at: datetime
+    recurring_time: str
+    next_run_time:Optional[datetime]
+    status: str
 
+    @classmethod
+    def from_query_result(cls, id, sender_id, amount, receiver_id, created_at, recurring_time, next_run_time, status):
+        return cls(
+            id=id,
+            sender_id=sender_id,
+            amount=amount,
+            receiver_id=receiver_id,
+            created_at=created_at,
+            recurring_time=recurring_time,
+            next_run_time=next_run_time,
+            status=status
+        )
 
 class User(BaseModel):
     id: int
