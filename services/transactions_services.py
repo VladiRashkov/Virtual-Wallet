@@ -5,14 +5,18 @@ from services.user_services import get_account_balance
 from data.schemas import AmountOut
 from datetime import date, datetime, time
 from data.models import Transaction
+from data.helpers import find_user_by_id, ADMIN_ERROR, is_admin, pagination_offset
 
 
-def all_user_transactions(user_id: int, transaction_type: str = None, sort_by: Optional[str] = 'created_at',
-                          order: Optional[str] = 'desc', transaction_status: str = 'all') -> List[
-                                                                                                 object] | HTTPException:
+def get_logged_user_transactions(user_id: int, transaction_type: str = None, sort_by: Optional[str] = 'created_at',
+                                 order: Optional[str] = 'desc', transaction_status: str = 'all') -> List[
+                                                                                                        object] | HTTPException:
     """Retrieves all transactions for a user by sender ID, including sent, received, and filtered by transaction status.
     Ensures no duplicate transactions by checking for deposits where sender_id and receiver_id are the same. Raises a 404
     HTTP exception if no transactions are found."""
+
+    if is_admin(user_id):
+        raise ADMIN_ERROR
 
     transactions = []
 
@@ -25,14 +29,12 @@ def all_user_transactions(user_id: int, transaction_type: str = None, sort_by: O
     # get transactions if the logged user is sender of the transaction
     if transaction_type == 'sent':
         transactions.clear()
-        sent_data = query.table('transactions').select('*').eq('sender_id', user_id).execute()
-        transactions.extend(sent_data.data)
+        transactions.extend(sender_data.data)
 
     # get transactions if the logged user is receiver of the transaction
     elif transaction_type == 'received':
         transactions.clear()
-        received_data = query.table('transactions').select('*').eq('receiver_id', user_id).execute()
-        transactions.extend(received_data.data)
+        transactions.extend(receiver_data.data)
 
     # get transaction status of the transactions which logged user SENT
     if transaction_status in ['confirmed', 'pending', 'declined']:
@@ -73,36 +75,33 @@ def all_user_transactions(user_id: int, transaction_type: str = None, sort_by: O
 
 
 def transfer_money(sender_id: int, receiver_id: int, amount: float, category: str):
-    sender = query.table('users').select(
-        'amount').eq('id', sender_id).execute()
-    receiver = query.table('users').select(
-        'amount').eq('id', receiver_id).execute()
+    sender = find_user_by_id(sender_id)
+    if sender.is_admin:
+        raise ADMIN_ERROR
 
-    sender_data = sender.data
-    receiver_data = receiver.data
+    if sender.is_blocked:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='You are blocked! You cannot make transactions!')
 
-    if not sender_data or not receiver_data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='The user was not found')
-    sender_balance = sender_data[0]['amount']
-    receiver_balance = receiver_data[0]['amount']
+    receiver = find_user_by_id(receiver_id)
+
+    if not sender:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Sender with id: {sender_id} not found!')
+
+    if not receiver:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Receiver with id: {receiver_id} not found!')
+
+    sender_balance = sender.amount
+    receiver_balance = receiver.amount
 
     if sender_balance < amount:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail='Insufficient balance')
 
-    # confirm = input(f"Are you sure you want to transfer {amount} to user with ID {receiver_id}? (yes/no): ")
-    # if confirm.lower() != "yes":
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST, detail='Transfer canceled by user')
-
     new_sender_balance = sender_balance - amount
-    # new_receiver_balance = receiver_balance + amount
 
     query.table('users').update({'amount': new_sender_balance}).eq(
         'id', sender_id).execute()
-    # query.table('users').update({'amount': new_receiver_balance}).eq(
-    #     'id', receiver_id).execute()
 
     transaction_data = {
         'sender_id': sender_id,
@@ -120,6 +119,9 @@ def transfer_money(sender_id: int, receiver_id: int, amount: float, category: st
 def deposit_money(deposit_amount: float, logged_user_id: int) -> AmountOut:
     """The deposit_money function is designed to update the account balance of a logged-in user
     by adding a specified deposit amount to their current balance."""
+
+    if is_admin(logged_user_id):
+        raise ADMIN_ERROR
 
     user_balance_data = get_account_balance(logged_user_id)
 
@@ -158,6 +160,9 @@ def withdraw_money(withdraw_sum: float, logged_user_id: int):
     # user_data = user.data[0]
     # user_amount = user_data['amount']
 
+    if is_admin(logged_user_id):
+        raise ADMIN_ERROR
+
     user_balance_data = get_account_balance(logged_user_id)
 
     user_balance = user_balance_data.balance
@@ -181,6 +186,9 @@ def withdraw_money(withdraw_sum: float, logged_user_id: int):
 
 
 def confirm_transaction(confirm_or_decline: str, transaction_id: int, logged_user_id: int):
+    if is_admin(logged_user_id):
+        raise ADMIN_ERROR
+
     transaction_data = query.table('transactions').select('*').eq('id', transaction_id).eq('sender_id',
                                                                                            logged_user_id).eq('status',
                                                                                                               'pending').execute()
@@ -212,8 +220,10 @@ def confirm_transaction(confirm_or_decline: str, transaction_id: int, logged_use
         return f'Transaction with id: {transaction_id} was CONFIRMED!'
 
 
-
 def accept_transaction(transaction_id: int, acceptation: str, logged_user_id: int) -> str:
+    if is_admin(logged_user_id):
+        raise ADMIN_ERROR
+
     """Handles the acceptance or decline of a transaction for a logged-in user.
        If the transaction is confirmed and pending, it updates the transaction's
        acceptation status and adjusts user balances accordingly. Raises HTTP
@@ -276,23 +286,23 @@ def accept_transaction(transaction_id: int, acceptation: str, logged_user_id: in
     # if acceptation is chosen to "pending":
     return f"Acceptation status is in pending again!"
 
-    
-#NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
+
+# NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
 def filter_transactions(
-    user_id: int,
-    start_date: Optional[date] = None,
-    end_date: Optional[date] = None,
-    sender_id: Optional[int] = None,
-    receiver_id: Optional[int] = None,
-    transaction_type: str = "all"
+        user_id: int,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        sender_id: Optional[int] = None,
+        receiver_id: Optional[int] = None,
+        transaction_type: str = "all"
 ) -> List[Transaction]:
     """Filters transactions based on the given criteria."""
-    
+
     start_datetime = datetime.combine(start_date, time.min) if start_date else None
     end_datetime = datetime.combine(end_date, time.max) if end_date else None
 
     query_builder = query.table('transactions').select('*')
-    
+
     if sender_id == None and receiver_id == None:
         if start_date:
             query_builder = query_builder.gte('created_at', start_datetime)
@@ -308,12 +318,13 @@ def filter_transactions(
             query_builder = query_builder.eq('receiver_id', user_id)
 
         transactions_data = query_builder.execute().data
-        
+
         if not transactions_data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No transactions found matching the criteria')
-        
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail='No transactions found matching the criteria')
+
         return transactions_data
-    
+
     if user_id not in [sender_id, receiver_id]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Unauthorized!')
 
@@ -329,11 +340,54 @@ def filter_transactions(
         query_builder = query_builder.eq('sender_id', user_id)
     elif transaction_type == "received":
         query_builder = query_builder.eq('receiver_id', user_id)
-    
+
     transactions_data = query_builder.execute().data
-    
+
     if not transactions_data:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No transactions found matching the criteria')
-    
+
     return transactions_data
 
+
+def get_all_transactions(user_id, logged_user_id, page, sent_or_received, start_date,
+                         end_date, direction, sort, order: str = 'desc'):
+    if not is_admin(logged_user_id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only ADMIN users can do this!')
+
+    records_per_page = 3
+    page_offset = pagination_offset(page, records_per_page)
+
+    # Initialize the query
+    query_obj = query.table('transactions').select('*')
+
+    if sent_or_received == 'sent':
+        query_obj = query_obj.eq('sender_id', user_id)
+
+    if sent_or_received == 'received':
+        query_obj = query_obj.eq('receiver_id', user_id)
+
+    # Apply date filters if provided
+    if start_date:
+        query_obj = query_obj.gte('created_at', start_date)
+
+    if end_date:
+        query_obj = query_obj.lte('created_at', end_date)
+
+    if direction:
+        if direction == 'incoming':
+            query_obj = query_obj.eq('receiver_id', user_id)
+        elif direction == 'outgoing':
+            query_obj = query_obj.eq('sender_id', user_id)
+
+    # Paginate the query
+    transactions_data = query_obj.range(page_offset, page_offset + records_per_page - 1).execute()
+    transactions = transactions_data.data
+
+    if not transactions:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No transactions!')
+
+    if sort in ['amount', 'created_at']:
+        reverse = (order == "desc")
+        transactions.sort(key=lambda x: x[sort], reverse=reverse)
+
+    return transactions

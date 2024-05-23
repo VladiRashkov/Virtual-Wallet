@@ -9,6 +9,8 @@ ACCESS_EXPIRE_MINUTES = 60
 
 bearer_scheme = HTTPBearer()
 
+token_blacklist = set()
+
 
 def create_token(data: dict):
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_EXPIRE_MINUTES)
@@ -41,3 +43,7 @@ def get_current_user(token: HTTPAuthorizationCredentials = Depends(bearer_scheme
 
     user_id = verify_access_token(token, credentials_exception)
     return int(user_id)
+
+
+def logout_user(token: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+    token_blacklist.add(token.credentials)

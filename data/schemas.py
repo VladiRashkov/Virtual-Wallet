@@ -99,3 +99,24 @@ class UpdateProfile(BaseModel):
     password: str
     email: str
     phone_number: str
+
+
+class ConfirmUserRegistration(BaseModel):
+    confirm: bool
+
+
+class GetUser(BaseModel):
+    id: int
+    username: str
+    password: str
+    email: str
+    phone_number: str
+    is_admin: bool
+    created_at: datetime
+    amount: float
+    is_registered: bool
+    is_blocked: bool
+
+
+class BlockOrUnblock(BaseModel):
+    is_blocked: bool
