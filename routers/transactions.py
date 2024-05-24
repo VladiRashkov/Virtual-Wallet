@@ -33,13 +33,6 @@ def get_logged_user_transactions(sort_by: Optional[str] = Query('created_at', pa
     return transactions
 
 
-# @transaction_router.get('/filter')
-# def get_filter(date:str,
-#                receiver_id:int,
-#                transaction_type:str = Query('all', pattern='^(sent|received)',
-#                sender_id: int = Depends(get_current_user)):
-
-
 @transaction_router.post('/create_transaction')
 def create_transaction(transaction_credentials: CreateTransaction, sender_id: int = Depends(get_current_user)):
     result = transactions_services.transfer_money(sender_id, transaction_credentials.receiver_id,
@@ -73,7 +66,7 @@ def accept_transaction(transaction_id: int, acceptation: AcceptTransaction, user
     return result
 
 
-# NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
+
 @transaction_router.get('/filter', response_model=List[Transaction])
 def filter_transactions_endpoint(
         start_date: Optional[date] = Query(None, description="Start date in the format YYYY-MM-DD"),
