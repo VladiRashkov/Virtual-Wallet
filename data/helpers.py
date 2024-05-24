@@ -1,5 +1,5 @@
 from data.connection import query
-from data.schemas import GetUser, AccountBalanceOut
+from data.schemas import GetUser, AccountBalanceOut, TransactionOut
 from fastapi import HTTPException, status
 
 PHONE_NUMBER_ERROR = HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -8,6 +8,8 @@ EMAIL_ERROR = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User 
 ID_ERROR = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User with this id not found!')
 USERNAME_ERROR = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User with this username not found!')
 ADMIN_ERROR = HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Admin cannot do this!')
+TRANSACTION_ERROR = HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                  detail='Transaction with this id is not found!')
 
 
 def find_user_by_phone_number(phone_number: str) -> GetUser | None:
@@ -137,3 +139,44 @@ def is_admin(user_id: int):
 def pagination_offset(page: int, page_size: int):
     offset = (page - 1) * page_size
     return offset
+
+
+def get_transaction(transaction_id: int) -> TransactionOut | None:
+    transaction_data = query.table('transactions').select('*').eq('id', transaction_id).execute().data
+
+    if not transaction_data:
+        return
+
+    transaction = transaction_data[0]
+
+    created_at = transaction['created_at']
+    amount = transaction['amount']
+    sender_id = transaction['sender_id']
+    receiver_id = transaction['receiver_id']
+    transaction_status = transaction['status']
+    category = transaction['category']
+    acceptation = transaction['acceptation']
+
+    return TransactionOut(id=transaction_id, created_at=created_at, amount=amount, sender_id=sender_id,
+                          receiver_id=receiver_id, status=transaction_status, category=category,
+                          acceptation=acceptation)
+
+
+def update_transaction(transaction_id: int, update_dict_data: dict):
+    transaction_data = query.table('transactions').update(update_dict_data).eq('id', transaction_id).execute().data
+    if not transaction_data:
+        return
+
+    transaction = transaction_data[0]
+
+    created_at = transaction['created_at']
+    amount = transaction['amount']
+    sender_id = transaction['sender_id']
+    receiver_id = transaction['receiver_id']
+    transaction_status = transaction['status']
+    category = transaction['category']
+    acceptation = transaction['acceptation']
+
+    return TransactionOut(id=transaction_id, created_at=created_at, amount=amount, sender_id=sender_id,
+                          receiver_id=receiver_id, status=transaction_status, category=category,
+                          acceptation=acceptation)
