@@ -95,8 +95,8 @@ class CreateRecurringTransaction(BaseModel):
     receiver_id: int
     amount: float
     recurring_time: str  # e.g., 'daily', 'weekly', 'monthly'
-    
-    
+
+
 class UpdateRecurringTransaction(BaseModel):
     receiver_id: int
     amount: float
@@ -133,3 +133,15 @@ class GetUser(BaseModel):
 
 class BlockOrUnblock(BaseModel):
     is_blocked: bool
+
+
+class TransactionOut(BaseModel):
+    id: int
+    created_at: datetime
+    amount: float
+    sender_id: int
+    receiver_id: int
+    status: str
+    category: str
+    acceptation: str
+

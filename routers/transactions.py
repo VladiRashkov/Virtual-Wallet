@@ -96,3 +96,9 @@ def get_all_transactions(user_id: int, logged_user_id: int = Depends(get_current
     result = transactions_services.get_all_transactions(user_id, logged_user_id, page, sent_or_received, start_date,
                                                         end_date, direction, sort, order)
     return result
+
+
+@transaction_router.put('/deny/{transaction_id}')
+def deny_transaction(transaction_id: int, logged_user_id: int = Depends(get_current_user)):
+    result = transactions_services.deny_transaction(transaction_id, logged_user_id)
+    return result

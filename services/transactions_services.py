@@ -1,11 +1,12 @@
 from data.connection import query
 from fastapi import HTTPException, status
-from typing import Optional, List, Dict, Any
+from typing import Optional, List
 from services.user_services import get_account_balance
 from data.schemas import AmountOut
 from datetime import date, datetime, time
 from data.models import Transaction
-from data.helpers import find_user_by_id, ADMIN_ERROR, is_admin, pagination_offset
+from data.helpers import find_user_by_id, ADMIN_ERROR, is_admin, pagination_offset, update_transaction, get_transaction, \
+    TRANSACTION_ERROR
 
 
 def get_logged_user_transactions(user_id: int, transaction_type: str = None, sort_by: Optional[str] = 'created_at',
@@ -303,7 +304,7 @@ def filter_transactions(
 
     query_builder = query.table('transactions').select('*')
 
-    if sender_id == None and receiver_id == None:
+    if sender_id is None and receiver_id is None:
         if start_date:
             query_builder = query_builder.gte('created_at', start_datetime)
         if end_date:
@@ -391,3 +392,27 @@ def get_all_transactions(user_id, logged_user_id, page, sent_or_received, start_
         transactions.sort(key=lambda x: x[sort], reverse=reverse)
 
     return transactions
+
+
+def deny_transaction(transaction_id, logged_user_id) -> str | HTTPException:
+    if not is_admin(logged_user_id):
+        raise ADMIN_ERROR
+
+    # return transaction as object
+    transaction = get_transaction(transaction_id)
+
+    if not transaction:
+        raise TRANSACTION_ERROR
+
+    # if transaction is not confirmed by the sender - cannot deny
+    if not transaction.status == 'confirmed':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail='You can deny only CONFIRMED by sender transactions!')
+
+    # see how update_transaction works
+    update_params = {'acceptation': 'declined'}
+
+    if transaction.acceptation == 'pending':
+        update_transaction(transaction_id, update_params)
+
+    return 'Transaction is declined successfully!'
