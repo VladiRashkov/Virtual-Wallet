@@ -4,7 +4,6 @@ from routers.transactions import transaction_router
 from routers.recurring_transactoins import recurring_transaction_router
 from routers.users import users_router
 import uvicorn
-from data import scheduler
 
 app = FastAPI()
 app.include_router(cards_router)

@@ -416,3 +416,43 @@ def deny_transaction(transaction_id, logged_user_id) -> str | HTTPException:
         update_transaction(transaction_id, update_params)
 
     return 'Transaction is declined successfully!'
+
+
+def edit_category(transaction_id: int, category_name: str, logged_user_id: int):
+    transaction = get_transaction(transaction_id)
+
+    if not transaction:
+        raise TRANSACTION_ERROR
+
+    if not transaction.sender_id == logged_user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='You can edit only your OWN transaction!')
+
+    query.table('transactions').update({'category': category_name}).eq('id', transaction_id).execute()
+
+    return 'Category was edited successfully!'
+
+
+def get_category_report(order: str, category_name: str, logged_user_id: int,
+                        start_date: Optional[date] = None, end_date: Optional[date] = None):
+
+    sort = 'created_at'
+    data = query.table('transactions').select('*').eq('category', category_name).eq('sender_id', logged_user_id)
+
+    if start_date:
+        data = data.gte('created_at', start_date.isoformat())
+    if end_date:
+        data = data.lte('created_at', end_date.isoformat())
+
+    transactions = data.execute().data
+
+    if not transactions:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Something is wrong! May category with this name does not exist or dates are '
+                                   'invalid!')
+
+    for transaction in transactions:
+        transaction['created_at'] = datetime.fromisoformat(transaction['created_at'])
+
+    transactions.sort(key=lambda x: x[sort], reverse=(order == 'desc'))
+
+    return transactions

@@ -1,40 +1,16 @@
 from data.connection import query
 from data.schemas import UserOut
 from fastapi import HTTPException, status
-from re import search
 from security.password_hashing import get_password_hash
 from data.helpers import get_account_balance, find_user_by_email, find_user_by_id, find_user_by_username, \
     find_user_by_phone_number, \
-    PHONE_NUMBER_ERROR, EMAIL_ERROR, USERNAME_ERROR, ID_ERROR, pagination_offset
+    PHONE_NUMBER_ERROR, EMAIL_ERROR, USERNAME_ERROR, ID_ERROR, pagination_offset, is_admin, is_valid_email, \
+    is_valid_password
 
 
 def get_user_balance(logged_user_id):
     user_balance = get_account_balance(logged_user_id)
     return user_balance
-
-
-def _is_valid_password(password: str) -> tuple[bool, str]:
-    """This function checks if a given password meets specific security requirements.
-    It returns a boolean indicating the validity of the password and a message detailing the result."""
-
-    if len(password) < 8:
-        return False, 'Password length must be more than 8 symbols!'
-    if not search(r'[A-Z]', password):
-        return False, 'Password must have at least one capital letter!'
-    if not search(r'\d', password):
-        return False, 'Password must have at least one digit!'
-    if not search(r'[+\-*^&]', password):
-        return False, 'Password must have at least one special character: (+, -, *, &, ^, …)'
-
-    return True, 'Password is created!'
-
-
-def _is_valid_email(email: str) -> True | False:
-    """This function checks if a given email address is valid based on the presence of '@' and '.' characters."""
-
-    if ('@' and '.') not in email:
-        return False
-    return True
 
 
 def create(username: str, password: str, email: str, phone_number: str) -> UserOut | HTTPException:
@@ -55,16 +31,16 @@ def create(username: str, password: str, email: str, phone_number: str) -> UserO
     if len(username) < 2 or len(username) > 20:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Username must be between 2-20 symbols!')
 
-    is_valid_password, is_valid_password_message = _is_valid_password(password)
+    is_valid_password_data, is_valid_password_message = is_valid_password(password)
 
-    if not is_valid_password:
+    if not is_valid_password_data:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=is_valid_password_message)
 
     # hashing the password if is valid
     hashed_password = get_password_hash(password)
 
     # check if email contains "@" or "."
-    if not _is_valid_email(email):
+    if not is_valid_email(email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email is not valid!')
 
     try:
@@ -129,12 +105,12 @@ def update_profile(password: str, email: str, phone_number: str, logged_user_id:
     hashed_pass = get_password_hash(password)
 
     # validation step
-    is_valid_pass = _is_valid_password(password)
-    is_valid_email = _is_valid_email(email)
+    is_valid_pass = is_valid_password(password)
+    is_valid_email_data = is_valid_email(email)
 
     if is_valid_pass[0] is False:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=is_valid_pass[1])
-    elif is_valid_email is False:
+    elif is_valid_email_data is False:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid email!')
     elif len(phone_number) != 10:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Phone number must be EXACTLY 10 symbols!')
@@ -184,7 +160,7 @@ def get_all_users(logged_user_id: int, username: str = None, email: str = None, 
     records_per_page = 3
     page_offset = pagination_offset(page, records_per_page)
 
-    if not _is_admin(logged_user_id):
+    if not is_admin(logged_user_id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='Only ADMIN users can get information for all users!')
 
@@ -246,7 +222,7 @@ def confirm_user_registration(confirmation: bool, user_email: str, logged_user_i
     This function ensures that only administrators can confirm user registrations,
     checks if the user exists, and updates their registration status accordingly."""
 
-    if not _is_admin(logged_user_id):
+    if not is_admin(logged_user_id):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail='Only ADMIN users can confirm user registration!')
 
@@ -269,21 +245,8 @@ def confirm_user_registration(confirmation: bool, user_email: str, logged_user_i
     return 'Confirmation for this user is NOT successful!'
 
 
-def _is_admin(logged_user_id: int) -> bool:
-    admin_data = query.table('users').select('*').eq('id', logged_user_id).execute()
-    admin = admin_data.data[0]
-    is_admin = admin['is_admin']
-
-    if is_admin:
-        return True
-
-    return False
-
-
 def block_user(block_status: bool, user_id: int, logged_user_id: int):
-    is_admin = find_user_by_id(logged_user_id).is_admin
-
-    if not is_admin:
+    if not is_admin(logged_user_id):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Only ADMIN users can block user!')
 
     user = find_user_by_id(user_id)
