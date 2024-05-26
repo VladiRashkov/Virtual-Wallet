@@ -1,12 +1,20 @@
 # routers/recurring_transactions.py
-from fastapi import APIRouter, Depends, HTTPException
-from services.recurring_transactions_services import create_recurring_transaction, process_recurring_transaction, update_recurring_transaction, delete_recurring_transaction
+from fastapi import APIRouter, Depends, HTTPException, Query
+from services.recurring_transactions_services import create_recurring_transaction, process_recurring_transaction, update_recurring_transaction, delete_recurring_transaction, get_all_recurring_transactions
 from data.schemas import CreateRecurringTransaction, UpdateRecurringTransaction
 from common.authorization import get_current_user
 from data.connection import query
+from typing import Optional
 
 
-recurring_transaction_router = APIRouter()
+recurring_transaction_router = APIRouter(prefix='/recurring_transactions')
+
+@recurring_transaction_router.get('/')
+def get_logged_user_transactions(sender_id: int = Depends(get_current_user)):
+    result = get_all_recurring_transactions(sender_id)
+    return result.data
+        # transactions = transactions_services.get_logged_user_transactions(sender_id, transaction_type, sort_by, order,
+        #                                                               transaction_status)
 
 @recurring_transaction_router.post('/create_recurring_transaction')
 def create_recurring_transaction_endpoint(transaction: CreateRecurringTransaction, sender_id: int = Depends(get_current_user)):

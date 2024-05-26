@@ -7,6 +7,11 @@ from fastapi import HTTPException, status
 from data.schemas import CreateRecurringTransaction, UpdateRecurringTransaction
 import logging
 
+def get_all_recurring_transactions(sender_id:int):
+    '''Retrieve all recurring transactions initiated by a given sender'''
+    all_transactions = query.table('recurring_transactions').select('receiver_id', 'amount', 'created_at', 'recurring_time').eq('sender_id', sender_id).execute()
+    return all_transactions
+
 logging.basicConfig(level=logging.DEBUG)
 def process_recurring_transaction(transaction_id: int):
     ''' Process a recurring transaction and schedule the next run based on its recurring time.'''
