@@ -84,3 +84,8 @@ class Card(BaseModel):
             cvv=cvv,
             number=number
         )
+
+
+class Contacts(BaseModel):
+    contact_id: int
+    current_user: int
