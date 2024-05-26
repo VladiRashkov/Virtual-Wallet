@@ -111,9 +111,19 @@ def transfer_money(sender_id: int, receiver_id: int, amount: float, category: st
         'status': "pending",
         'category': category
     }
-
-    insert_transaction = query.table('transactions').insert(transaction_data).execute()
-
+    
+    save_contact = {
+        'contact_name_id': receiver_id,
+        'current_user': sender_id
+    }
+    
+    existing_contact = query.table('contacts').select('current_user', 'contact_name_id').eq('current_user',sender_id).eq('contact_name_id', receiver_id).execute()
+    if existing_contact.data:
+        insert_transaction = query.table('transactions').insert(transaction_data).execute()
+    else:
+        insert_transaction = query.table('transactions').insert(transaction_data).execute()
+        query.table('contacts').insert(save_contact).execute()
+    
     return 'Successful', insert_transaction
 
 
