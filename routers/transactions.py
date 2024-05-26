@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Any
 
 from data.schemas import DepositAmount, WithdrawMoney, CreateTransaction, ConfirmOrDecline, AcceptTransaction
 
-from datetime import date
+from datetime import date,datetime
 from data.models import Transaction
 
 # 1. Transaction history after a regular user has logged in  -- sending part, reciever part in progress
@@ -39,6 +39,19 @@ def create_transaction(transaction_credentials: CreateTransaction, sender_id: in
                                                   transaction_credentials.amount,
                                                   transaction_credentials.category)
     return {'message': result[0]}
+
+
+@transaction_router.put('/{transaction_id}/category')
+def edit_category(transaction_id: int, category_name: str, logged_user_id: int = Depends(get_current_user)):
+    result = transactions_services.edit_category(transaction_id, category_name, logged_user_id)
+    return result
+
+
+@transaction_router.get('/{category_name}')
+def get_category_report(order: str, category_name: str, logged_user_id: int = Depends(get_current_user),
+                        start_date: Optional[date] = None, end_date: Optional[date] = None):
+    result = transactions_services.get_category_report(order, category_name, logged_user_id, start_date, end_date)
+    return result
 
 
 @transaction_router.put('/deposit')
@@ -95,4 +108,10 @@ def get_all_transactions(user_id: int, logged_user_id: int = Depends(get_current
                          sort: str = Query(None, description="amount | created_at"), order: str = 'desc'):
     result = transactions_services.get_all_transactions(user_id, logged_user_id, page, sent_or_received, start_date,
                                                         end_date, direction, sort, order)
+    return result
+
+
+@transaction_router.put('/deny/{transaction_id}')
+def deny_transaction(transaction_id: int, logged_user_id: int = Depends(get_current_user)):
+    result = transactions_services.deny_transaction(transaction_id, logged_user_id)
     return result
