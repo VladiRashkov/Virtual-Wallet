@@ -6,7 +6,8 @@ from routers.users import users_router
 from routers.contacts import router_contacts
 import uvicorn
 
-app = FastAPI()
+
+app = FastAPI(swagger_ui_parameters={"operationsSorter": "alpha"})
 app.include_router(cards_router)
 app.include_router(router_contacts)
 app.include_router(users_router)
