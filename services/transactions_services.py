@@ -77,6 +77,8 @@ def get_logged_user_transactions(user_id: int, transaction_type: str = None, sor
 
 def transfer_money(sender_id: int, receiver_id: int, amount: float, category: str):
     sender = find_user_by_id(sender_id)
+    if not sender:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Sender with id: {sender_id} not found!')
     if sender.is_admin:
         raise ADMIN_ERROR
 

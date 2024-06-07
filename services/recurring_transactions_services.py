@@ -153,3 +153,6 @@ def delete_recurring_transaction(recurring_transaction_id: int, user_id: int) ->
 
     query.table('recurring_transactions').delete().eq('id', recurring_transaction_id).execute()
     logging.info(f"Deleted recurring transaction {recurring_transaction_id}")
+    
+
+    return True 
