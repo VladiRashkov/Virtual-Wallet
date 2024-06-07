@@ -61,7 +61,7 @@ def process_recurring_transaction(transaction_id: int):
     elif transaction.recurring_time == 'monthly':
         next_run_time = datetime.now() + timedelta(weeks=4)
     elif transaction.recurring_time == 'minutely':
-        next_run_time = datetime.now() + timedelta(minutes=1)
+        next_run_time = datetime.now() + timedelta(minutes=2)
     else:
         logging.error(f"Invalid recurring time: {transaction.recurring_time}")
         return
@@ -153,3 +153,6 @@ def delete_recurring_transaction(recurring_transaction_id: int, user_id: int) ->
 
     query.table('recurring_transactions').delete().eq('id', recurring_transaction_id).execute()
     logging.info(f"Deleted recurring transaction {recurring_transaction_id}")
+    
+
+    return True 
