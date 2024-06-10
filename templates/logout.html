@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Logout</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="logout-container">
+        <h1>Logout</h1>
+        {% if message %}
+            <p>{{ message }}</p>
+        {% else %}
+            <form id="logout-form" action="/users/logout" method="post">
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
+        {% endif %}
+    </div>
+
+    <script>
+        function deleteCookie(name) {
+            document.cookie = name + '=; Max-Age=0; path=/;';
+        }
+
+        document.getElementById('logout-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            fetch('/users/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    # delete access_token from cookies
+                    deleteCookie('access_token');
+                    window.location.href = '/';  #redirect to home page
+                } else {
+                    # if has some errors, it shows this:
+                    alert('Logout failed!');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

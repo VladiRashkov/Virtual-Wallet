@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Block/Unblock User</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="block-user-container">
+        <h1>Block/Unblock User</h1>
+        {% if error %}
+            <div class="alert-error">{{ error }}</div>
+        {% elif success %}
+            <div class="alert-success">{{ success }}</div>
+        {% endif %}
+        <form method="post" action="/users/block" class="block-user-form">
+            <div class="form-group">
+                <label for="user_id">User ID:</label>
+                <input type="number" id="user_id" name="user_id" required class="block-user-input special-input">
+            </div>
+            <div class="form-group">
+                <label for="block_status">Block Status:</label>
+                <select id="block_status" name="block_status" required class="block-user-select special-select">
+                    <option value="true">Block</option>
+                    <option value="false">Unblock</option>
+                </select>
+            </div>
+            <button type="submit" class="block-user-button special-button">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
