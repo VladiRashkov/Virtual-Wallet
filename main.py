@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers.cards import router as cards_router
+from routers.cards import cards_router
 from routers.transactions import transaction_router
 from routers.recurring_transactoins import recurring_transaction_router
 from routers.users import users_router
