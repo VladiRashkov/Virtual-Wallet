@@ -21,7 +21,7 @@ http://127.0.0.1:8000. By visiting this URL in your web browser, you can interac
 
 - Once the server is running, you can find the documentation for each endpoint in the ReDoc interface at: http://127.0.0.1:8000/redoc
 
-[database](https://supabase.com/dashboard/project/lcrwokhdqhyvbcjmuedq/editor/29471?sort=id%3Aasc)
+[DB -> Supabase](https://supabase.com/dashboard/project/lcrwokhdqhyvbcjmuedq/editor/29471?sort=id%3Aasc)
 
 ## 5. Technologies implemented:
 - Python
