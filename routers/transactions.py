@@ -8,7 +8,7 @@ from datetime import date
 from data.models import Transaction
 
 
-transaction_router = APIRouter(prefix='/transactions')
+transaction_router = APIRouter(prefix='/transactions', tags=['Transactions'])
 
 
 @transaction_router.get('/user')
