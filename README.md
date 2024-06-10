@@ -12,3 +12,18 @@
 
 ## 3.Architecture Diagram
 ![architecture](./architecture.jpg)
+
+## 4.Hosting
+
+How to interact with the API:
+- To run the FastAPI project locally, use Uvicorn as the server. Navigate to your project directory in the terminal and execute the following command: uvicorn main:app --reload. This command will start the FastAPI server in development mode with automatic reloading enabled. The application will be accessible at the URL:
+http://127.0.0.1:8000. By visiting this URL in your web browser, you can interact with your FastAPI application using SWAGGER.
+
+- Once the server is running, you can find the documentation for each endpoint in the ReDoc interface at: http://127.0.0.1:8000/redoc
+
+[database](https://supabase.com/dashboard/project/lcrwokhdqhyvbcjmuedq/editor/29471?sort=id%3Aasc)
+
+## 5. Technologies implemented:
+- Python
+- Supabase
+- FastAPI
