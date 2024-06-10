@@ -4,7 +4,7 @@ from services import user_services
 from data.schemas import UserCreate, UserLogin, UpdateProfile, ConfirmUserRegistration, BlockOrUnblock
 from fastapi import Depends
 
-users_router = APIRouter(prefix='/users')
+users_router = APIRouter(prefix='/users', tags=['Users'])
 
 
 @users_router.get('/balance')

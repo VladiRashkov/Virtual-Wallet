@@ -8,7 +8,7 @@ from data.connection import query
 
 recurring_transaction_router = APIRouter(prefix='/recurring_transactions')
 
-@recurring_transaction_router.get('/')
+@recurring_transaction_router.get('/',tags=['Recurring Transactions'])
 def get_logged_user_transactions(sender_id: int = Depends(get_current_user)):
     '''
     Retrieves all recurring transactions for the logged-in user.
@@ -22,7 +22,7 @@ def get_logged_user_transactions(sender_id: int = Depends(get_current_user)):
     result = get_all_recurring_transactions(sender_id)
     return result.data
       
-@recurring_transaction_router.post('/recurring_transaction')
+@recurring_transaction_router.post('/recurring_transaction', tags=['Recurring Transactions'])
 def create_recurring_transaction_endpoint(transaction: CreateRecurringTransaction, sender_id: int = Depends(get_current_user)):
     '''
     Creates a new recurring transaction initiated by the logged-in user.
@@ -38,7 +38,7 @@ def create_recurring_transaction_endpoint(transaction: CreateRecurringTransactio
     return {'message': result}
 
 
-@recurring_transaction_router.post('/process/{transaction_id}')
+@recurring_transaction_router.post('/process/{transaction_id}', tags=['Recurring Transactions'])
 def process_recurring_transaction_endpoint(transaction_id: int, user_id: int = Depends(get_current_user)):
     '''
     Processes a recurring transaction by the logged-in user.
@@ -62,7 +62,7 @@ def process_recurring_transaction_endpoint(transaction_id: int, user_id: int = D
     process_recurring_transaction(transaction_id)
     return {'message': f"Recurring transaction {transaction_id} processed successfully"}
 
-@recurring_transaction_router.put('/{recurring_transaction_id}')
+@recurring_transaction_router.put('/{recurring_transaction_id}', tags=['Recurring Transactions'])
 def update_recurring_transaction_endpoint(recurring_transaction_id: int, update_transaction: UpdateRecurringTransaction, user_id: int = Depends(get_current_user)):
     '''
     Updates a recurring transaction by the logged-in user.
@@ -81,7 +81,7 @@ def update_recurring_transaction_endpoint(recurring_transaction_id: int, update_
     return {'message': f'Recurring transation {recurring_transaction_id} updated successfully'}
 
 
-@recurring_transaction_router.delete('/{recurring_transaction_id}')
+@recurring_transaction_router.delete('/{recurring_transaction_id}', tags=['Recurring Transactions'])
 def delete_recurring_transaction_endpoint(recurring_transaction_id: int, user_id: int = Depends(get_current_user)):
     '''
     Deletes a recurring transaction by the logged-in user.

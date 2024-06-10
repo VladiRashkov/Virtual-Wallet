@@ -8,10 +8,10 @@ from datetime import date
 from data.models import Transaction
 
 
-transaction_router = APIRouter(prefix='/transactions')
+transaction_router = APIRouter(prefix='/transactions', tags=['Transactions'])
 
 
-@transaction_router.get('/user')
+@transaction_router.get('/user', tags=['Transactions'])
 def get_logged_user_transactions(sort_by: Optional[str] = Query('created_at', pattern='^(created_at|amount)$'),
                                  order: Optional[str] = Query('desc', pattern='^(asc|desc)$'),
                                  transaction_type: str = Query(None, pattern='^(sent|received)$'),
@@ -31,7 +31,7 @@ def get_logged_user_transactions(sort_by: Optional[str] = Query('created_at', pa
     return transactions
 
 
-@transaction_router.post('/transaction')
+@transaction_router.post('/transaction', tags=['Transactions'])
 def create_transaction(transaction_credentials: CreateTransaction, sender_id: int = Depends(get_current_user)):
     '''Creates a new transaction initiated by the logged-in user.'''
     result = transactions_services.transfer_money(sender_id, transaction_credentials.receiver_id,
@@ -40,7 +40,7 @@ def create_transaction(transaction_credentials: CreateTransaction, sender_id: in
     return {'message': result[0]}
 
 
-@transaction_router.put('/{transaction_id}/category')
+@transaction_router.put('/{transaction_id}/category', tags=['Transactions'])
 def edit_category(transaction_id: int, category_name: str, logged_user_id: int = Depends(get_current_user)):
     '''Edits the category of a transaction by the logged-in user.'''
     
@@ -48,7 +48,7 @@ def edit_category(transaction_id: int, category_name: str, logged_user_id: int =
     return result
 
 
-@transaction_router.get('/{category_name}')
+@transaction_router.get('/{category_name}',tags=['Transactions'])
 def get_category_report(order: str, category_name: str, logged_user_id: int = Depends(get_current_user),
                         start_date: Optional[date] = None, end_date: Optional[date] = None):
     '''Retrieves a category report for the logged-in user.'''
@@ -56,20 +56,20 @@ def get_category_report(order: str, category_name: str, logged_user_id: int = De
     return result
 
 
-@transaction_router.put('/deposit')
+@transaction_router.put('/deposit', tags=['Transactions'])
 def deposit_money(deposit_credentials: DepositAmount, user: int = Depends(get_current_user)):
     '''    Deposits money into the account of the logged-in user.'''
     result = transactions_services.deposit_money(deposit_credentials.deposit_amount, user)
     return result
 
 
-@transaction_router.put('/withdraw')
+@transaction_router.put('/withdraw', tags=['Transactions'])
 def extract_money(withdraw_sum: WithdrawMoney, user: int = Depends(get_current_user)):
     result = transactions_services.withdraw_money(withdraw_sum.withdraw_sum, user)
     return result
 
 
-@transaction_router.put('/confirm/{transaction_id}')
+@transaction_router.put('/confirm/{transaction_id}', tags=['Transactions'])
 def confirm_transaction(confirm_or_decline: ConfirmOrDecline, transaction_id: int,
                         user: int = Depends(get_current_user)):
     '''Extracts money from the account of the logged-in user.'''
@@ -77,7 +77,7 @@ def confirm_transaction(confirm_or_decline: ConfirmOrDecline, transaction_id: in
     return result
 
 
-@transaction_router.put('/accept/{transaction_id}')
+@transaction_router.put('/accept/{transaction_id}', tags=['Transactions'])
 def accept_transaction(transaction_id: int, acceptation: AcceptTransaction, user: int = Depends(get_current_user)):
     ''' Accepts a transaction by the logged-in user.'''
     result = transactions_services.accept_transaction(transaction_id, acceptation.acceptation, user)
@@ -85,7 +85,7 @@ def accept_transaction(transaction_id: int, acceptation: AcceptTransaction, user
 
 
 
-@transaction_router.get('/filter', response_model=List[Transaction])
+@transaction_router.get('/filter', response_model=List[Transaction], tags=['Transactions'])
 def filter_transactions_endpoint(
         start_date: Optional[date] = Query(None, description="Start date in the format YYYY-MM-DD"),
         end_date: Optional[date] = Query(None, description="End date in the format YYYY-MM-DD"),
@@ -120,7 +120,7 @@ def filter_transactions_endpoint(
     return transactions
 
 
-@transaction_router.get('/{user_id}')
+@transaction_router.get('/{user_id}', tags=['Transactions'])
 def get_all_transactions(user_id: int, logged_user_id: int = Depends(get_current_user), page: int = 1,
                          sent_or_received: str = None,
                          start_date: Optional[str] = None,
@@ -132,7 +132,7 @@ def get_all_transactions(user_id: int, logged_user_id: int = Depends(get_current
     return result
 
 
-@transaction_router.put('/deny/{transaction_id}')
+@transaction_router.put('/deny/{transaction_id}', tags=['Transactions'])
 def deny_transaction(transaction_id: int, logged_user_id: int = Depends(get_current_user)):
     '''Denies a transaction by the logged-in user.'''
     result = transactions_services.deny_transaction(transaction_id, logged_user_id)

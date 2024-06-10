@@ -4,7 +4,7 @@ from data.schemas import Card, CardCreate, CardUpdate
 from services import cards_services
 from common.authorization import get_current_user
 
-cards_router = APIRouter(prefix='/cards')
+cards_router = APIRouter(prefix='/cards', tags=['Cards'])
 
 @cards_router.post("/", response_model=Card, status_code=status.HTTP_201_CREATED)
 def create_card(card: CardCreate, user_id: int = Depends(get_current_user)):
