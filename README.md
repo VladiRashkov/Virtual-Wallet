@@ -1,6 +1,6 @@
 # Virtual-Wallet
 
-## 1.Project discription
+## 1.Project description
 
 - User Management: Enables user registration, login, profile management, and admin functions like user authorization and account blocking.
 - Transaction Handling: Supports money transfers between users and from bank accounts, including recurring transactions and category-based tracking.
