@@ -33,7 +33,7 @@ def get_logged_user_transactions(sort_by: Optional[str] = Query('created_at', pa
     return transactions
 
 
-@transaction_router.post('/create_transaction')
+@transaction_router.post('/transaction')
 def create_transaction(transaction_credentials: CreateTransaction, sender_id: int = Depends(get_current_user)):
     result = transactions_services.transfer_money(sender_id, transaction_credentials.receiver_id,
                                                   transaction_credentials.amount,
