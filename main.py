@@ -1,13 +1,16 @@
 from fastapi import FastAPI
+
 from fastapi import status
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse, HTMLResponse
 from common.authorization import get_current_user, verify_access_token
-from routers.cards import router as cards_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
+
+from routers.cards import cards_router
+
 from routers.transactions import transaction_router
 from routers.recurring_transactoins import recurring_transaction_router
 from routers.users import users_router

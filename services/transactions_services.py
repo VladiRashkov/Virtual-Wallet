@@ -165,13 +165,6 @@ def deposit_money(deposit_amount: float, logged_user_id: int) -> AmountOut:
 
 
 def withdraw_money(withdraw_sum: float, logged_user_id: int):
-    # user = query.table('users').select('amount').eq('id', logged_user_id).execute()
-
-    # if not user.data:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-    #                         detail='The user was not found')
-    # user_data = user.data[0]
-    # user_amount = user_data['amount']
 
     if is_admin(logged_user_id):
         raise ADMIN_ERROR

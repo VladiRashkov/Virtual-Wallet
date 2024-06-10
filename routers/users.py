@@ -12,7 +12,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 templates = Jinja2Templates(directory="templates")
 
-users_router = APIRouter(prefix='/users')
+users_router = APIRouter(prefix='/users', tags=['Users'])
 
 
 @users_router.get('/balance')
