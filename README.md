@@ -1,6 +1,7 @@
 # Virtual-Wallet
 
 ## 1.Project discription
+
 - User Management: Enables user registration, login, profile management, and admin functions like user authorization and account blocking.
 - Transaction Handling: Supports money transfers between users and from bank accounts, including recurring transactions and category-based tracking.
 - Card Management: Allows users to register, update, and delete credit/debit cards, enabling fund transfers to and from their virtual wallets.
@@ -8,9 +9,11 @@
 - Admin Capabilities: Admins can approve registrations, block/unblock users, view and manage transactions, and deny pending transactions, ensuring smooth operation and security.
 
 ## 2.Database
+
 ![database](./database.jpg)
 
 ## 3.Architecture Diagram
+
 ![architecture](./architecture.jpg)
 
 ## 4.Hosting
@@ -21,9 +24,10 @@ http://127.0.0.1:8000. By visiting this URL in your web browser, you can interac
 
 - Once the server is running, you can find the documentation for each endpoint in the ReDoc interface at: http://127.0.0.1:8000/redoc
 
-[database](https://supabase.com/dashboard/project/lcrwokhdqhyvbcjmuedq/editor/29471?sort=id%3Aasc)
+[DB -> Supabase](https://supabase.com/dashboard/project/lcrwokhdqhyvbcjmuedq/editor/29471?sort=id%3Aasc)
 
 ## 5. Technologies implemented:
+
 - Python
 - Supabase
 - FastAPI
