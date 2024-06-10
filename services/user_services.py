@@ -154,9 +154,6 @@ def get_logged_user(logged_user_id: int) -> UserOut | HTTPException:
 
 def get_all_users(logged_user_id: int, username: str = None, email: str = None, phone_number: str = None,
                   registered: bool = None, page: int = 1):
-    """This function retrieves a list of all users from the database.
-    It ensures that only administrators can access this information and provides an option to
-    filter the users based on their registration status."""
     records_per_page = 3
     page_offset = pagination_offset(page, records_per_page)
 
@@ -164,57 +161,21 @@ def get_all_users(logged_user_id: int, username: str = None, email: str = None, 
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='Only ADMIN users can get information for all users!')
 
-    # get all users with pagination
-    users_data = query.table('users').select('*').range(page_offset, page_offset + records_per_page - 1).execute()
-    users = users_data.data
+    query_builder = query.table('users').select('*').range(page_offset, page_offset + records_per_page - 1).order('id')
 
     if phone_number:
-        user = find_user_by_phone_number(phone_number)
-        if not user:
-            raise PHONE_NUMBER_ERROR
+        query_builder = query_builder.eq('phone_number', phone_number)
+    if username:
+        query_builder = query_builder.eq('username', username)
+    if email:
+        query_builder = query_builder.eq('email', email)
+    if registered is not None:
+        query_builder = query_builder.eq('is_registered', registered)
 
-        return user
+    users_data = query_builder.execute()
+    users = users_data.data
 
-    elif username:
-        user = find_user_by_username(username)
-        if not user:
-            raise USERNAME_ERROR
-
-        return user
-    elif email:
-        user = find_user_by_email(email)
-        if not user:
-            raise EMAIL_ERROR
-
-        return user
-
-    not_registered_users = []
-
-    registered_users = []
-
-    # check for not registered users
-    for user in users:
-        if user['is_registered'] is False:
-            not_registered_users.append(user)
-        else:
-            registered_users.append(user)
-
-    if registered is None:
-        return users
-
-    elif registered is False:
-        # check if not_registered users list is empty - if all users are registered
-        if not not_registered_users:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail='It does not have non registered users for now!')
-        return not_registered_users
-
-    elif registered is True:
-        # check if registered_users list is empty - if all users are not registered
-        if not registered_users:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail='It does not have registered users for now!')
-        return registered_users
+    return users
 
 
 def confirm_user_registration(confirmation: bool, user_email: str, logged_user_id: int):

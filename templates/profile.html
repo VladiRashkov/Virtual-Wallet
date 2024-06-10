@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="profile-container">
+        <h1>User Profile</h1>
+        {% if error %}
+            <div class="alert-error">{{ error }}</div>
+        {% else %}
+            <div class="profile-details">
+                <p><strong>ID:</strong> {{ user.id }}</p>
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Phone Number:</strong> {{ user.phone_number }}</p>
+                <p><strong>Created At:</strong> {{ user.created_at }}</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

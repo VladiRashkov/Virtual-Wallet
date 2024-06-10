@@ -1,0 +1,314 @@
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom right, #6a0dad, #bd7e5f, #7d1710);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-size: 400% 400%;
+    animation: gradientBackground 15s ease infinite;
+}
+
+@keyframes gradientBackground {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.profile-container, .error-container, .login-container, .home-container, .confirm-registration-container {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    max-width: 90%;
+    text-align: center;
+    margin: 20px;
+}
+
+.wide-profile-container {
+    width: 80%;
+}
+
+.block-user-container {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    max-width: 90%;
+    text-align: center;
+    margin: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #ffffff;
+}
+
+form.block-user-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+form.block-user-form label {
+    margin: 10px 0 5px;
+    text-align: left;
+    color: #ffffff;
+}
+
+form.block-user-form .alert-error,
+form.block-user-form .alert-success {
+    margin-bottom: 20px;
+}
+
+form.block-user-form input.block-user-input,
+form.block-user-form select.block-user-select{
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid white;
+    border-radius: 8px;
+    background-color: transparent;
+    color: white;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+form.block-user-form select.block-user-select option {
+    background-color: transparent;
+    color: black;
+    border: 1px solid white;
+}
+
+form.block-user-form button.block-user-button {
+    padding: 10px;
+    color: white;
+    border: 1px solid white;
+    background-color: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+form.block-user-form button.block-user-button:hover {
+    background-color: rgb(255, 255, 255);
+    color: black;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin: 10px 0 5px;
+    text-align: left;
+    color: #ffffff;
+}
+
+input {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+button {
+    padding: 10px;
+    color: white;
+    border: 1px solid white;
+    background-color: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+button:hover {
+    background-color: rgb(255, 255, 255);
+    color:black;
+}
+.btn {
+    padding: 10px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    text-align: center;
+    color: white;
+}
+
+.alert-error {
+    border: 1px solid #f5c6cb;
+}
+
+.register-container {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    max-width: 90%;
+    text-align: center;
+    margin: 20px;
+}
+
+.alert-success {
+    background: linear-gradient(to bottom right, #6a0dad, #ff8c00);
+    color: white;
+    border: 1px solid #c3e6cb;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ffffff;
+    text-align: left;
+}
+
+table th {
+    background-color: #6a0dad;
+    color: white;
+}
+
+table td {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.home-link {
+    margin-top: 20px;
+}
+
+.home-link a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.home-link a:hover {
+    text-decoration: underline;
+}
+
+
+.filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+}
+
+.filter-form input, .filter-form select, .filter-form button {
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 20%;
+    box-sizing: border-box;
+
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    table-layout: fixed;
+}
+
+.users-table th, .users-table td {
+    padding: 10px;
+    border: 1px solid #ffffff;
+    text-align: left;
+    color: white;
+}
+
+.users-table th {
+    background-color: transparent;
+    color: white;
+}
+
+.users-table td {
+    background-color: transparent;
+    word-wrap: break-word;
+}
+
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination a {
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid white;
+}
+
+.pagination a:hover {
+    background-color: white;
+}
+
+
+.profile-details {
+    color: white;
+    text-align: left;
+}
+.input_block{
+    color:black;
+}
+
+.logout-container {
+    text-align: center;
+    margin-top: 50px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    max-width: 90%;
+    text-align: center;
+    margin: 20px auto;
+}
+
+.logout-button {
+    padding: 10px 20px;
+    color: white;
+    border: 1px solid white;
+    background-color: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.logout-button:hover {
+    background-color: rgb(255, 255, 255);
+    color: black;
+}

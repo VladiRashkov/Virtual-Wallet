@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Profile</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="profile-container">
+        <h1>Update Profile</h1>
+        {% if error %}
+            <p class="error-message">{{ error }}</p>
+        {% endif %}
+        {% if success %}
+            <p class="success-message">{{ success }}</p>
+        {% endif %}
+        <form action="/users/profile/update" method="post">
+            <label for="email">New Email:</label>
+            <input type="email" id="email" name="email" required value="{{ user.email }}">
+            <label for="password">New Password:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="phone_number">New Phone Number:</label>
+            <input type="text" id="phone_number" name="phone_number" required value="{{ user.phone_number }}">
+            <button type="submit">Update Profile</button>
+        </form>
+    </div>
+</body>
+</html>

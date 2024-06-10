@@ -4,7 +4,8 @@ from data.schemas import Card, CardCreate, CardUpdate
 from services import cards_services
 from common.authorization import get_current_user
 
-router = APIRouter()
+router = APIRouter(prefix='/cards')
+
 
 @router.post("/", response_model=Card, status_code=status.HTTP_201_CREATED)
 def create_card(card: CardCreate, user_id: int = Depends(get_current_user)):
@@ -16,12 +17,14 @@ def create_card(card: CardCreate, user_id: int = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+
 @router.get("/", response_model=List[Card])
 def read_cards(user_id: int = Depends(get_current_user)):
     try:
         return cards_services.get_all_cards()
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
 
 @router.get("/{card_id}", response_model=Card)
 def read_card(card_id: int, user_id: int = Depends(get_current_user)):
@@ -33,6 +36,7 @@ def read_card(card_id: int, user_id: int = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+
 @router.put("/{card_id}", response_model=Card)
 def update_card(card_id: int, card: CardUpdate, user_id: int = Depends(get_current_user)):
     card_data = card.dict(exclude_unset=True)
@@ -43,6 +47,7 @@ def update_card(card_id: int, card: CardUpdate, user_id: int = Depends(get_curre
         return updated_card
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
 
 @router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_card(card_id: int, user_id: int = Depends(get_current_user)):
