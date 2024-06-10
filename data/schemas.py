@@ -59,7 +59,7 @@ class ConfirmOrDecline(BaseModel):
 
 CardType = Annotated[str, Field(pattern=r'^(credit|debit)$')]
 ExpirationDate = Annotated[str, Field(pattern=r'^\d{4}$')]
-CardNumber = Annotated[str, Field(min_length=16, max_length=16, patterbn=r'^\d{16}$')]
+CardNumber = Annotated[str, Field(min_length=16, max_length=16, pattern=r'^\d{16}$')]
 
 
 class CardBase(BaseModel):
