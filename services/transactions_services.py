@@ -293,7 +293,7 @@ def accept_transaction(transaction_id: int, acceptation: str, logged_user_id: in
     return f"Acceptation status is in pending again!"
 
 
-# NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
+
 def filter_transactions(
         user_id: int,
         start_date: Optional[date] = None,

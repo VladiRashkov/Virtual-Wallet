@@ -61,7 +61,7 @@ def process_recurring_transaction(transaction_id: int):
     elif transaction.recurring_time == 'monthly':
         next_run_time = datetime.now() + timedelta(weeks=4)
     elif transaction.recurring_time == 'minutely':
-        next_run_time = datetime.now() + timedelta(minutes=2)
+        next_run_time = datetime.now() + timedelta(minutes=1)
     else:
         logging.error(f"Invalid recurring time: {transaction.recurring_time}")
         return
