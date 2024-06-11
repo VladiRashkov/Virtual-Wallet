@@ -1,23 +1,18 @@
-from fastapi import FastAPI
-
-from fastapi import status
-from fastapi import HTTPException
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
-from fastapi.responses import JSONResponse, HTMLResponse
-from common.authorization import get_current_user, verify_access_token
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import status
 
+from common.authorization import verify_access_token
 from routers.cards import cards_router
-
 from routers.transactions import transaction_router
 from routers.recurring_transactoins import recurring_transaction_router
 from routers.users import users_router
 from routers.contacts import router_contacts
 from routers.home_router import home_router
-from fastapi.templating import Jinja2Templates
-import uvicorn
 
 templates = Jinja2Templates(directory="templates")
 
@@ -44,14 +39,12 @@ app.add_middleware(
 async def add_token_to_request(request: Request, call_next):
     token = request.cookies.get("access_token")
     if token:
-
         credentials_exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
         try:
-
             user_id = verify_access_token(HTTPAuthorizationCredentials(scheme="Bearer", credentials=token),
                                           credentials_exception)
             request.state.user_id = user_id
@@ -63,6 +56,10 @@ async def add_token_to_request(request: Request, call_next):
     response = await call_next(request)
     return response
 
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 if __name__ == "__main__":
-    uvicorn.run('main:app', host='127.0.0.1', port=8000,reload=True)
+    import uvicorn
+    uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True)
