@@ -1,5 +1,7 @@
 # Virtual-Wallet
 
+Virtual Wallet is a web application designed to help users manage their budget. It allows users to send and receive money between each other and transfer funds from a bank account to their virtual wallet.
+
 ## 1.Project description
 
 - User Management: Enables user registration, login, profile management, and admin functions like user authorization and account blocking.
