@@ -12,8 +12,8 @@ def all_users_contacts(logged_user_id: int = Depends(get_current_user)):
     return result
 
 @router_contacts.get('/find', tags=['Contacts'])
-def find_contact(logged_user_id:int = Depends(get_current_user), search: str = '', value: str = ''):
-    '''Find a user's contact by a specific attribute (phone number, username, or email).'''
+def find_contact(logged_user_id:int = Depends(get_current_user), search: str = 'phone_number, username, or email', value: str = ''):
+    '''Find a user's contact by a specific attribute (phone_number, username, or email).'''
     contact = find_contact_by_attribute(logged_user_id, search, value)
     if contact:
         return contact
