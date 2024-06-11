@@ -53,7 +53,7 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
     try:
         user = user_services.try_login(email, password)
         access_token = create_token(data={"user_id": user.id})
-        response = RedirectResponse(url="/dashboard", status_code=status.HTTP_302_FOUND)
+        response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
         response.set_cookie(key="access_token", value=access_token, httponly=True)
         return response
     except HTTPException as e:
