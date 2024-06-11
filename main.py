@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import status
-
+import uvicorn
 from common.authorization import verify_access_token
 from routers.cards import cards_router
 from routers.transactions import transaction_router
@@ -58,5 +58,5 @@ async def add_token_to_request(request: Request, call_next):
 
 
 if __name__ == "__main__":
-    import uvicorn
+
     uvicorn.run('main:app', host='127.0.0.1', port=8000,reload=True)

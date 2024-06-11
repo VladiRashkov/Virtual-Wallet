@@ -17,14 +17,14 @@ def get_logged_user_transactions(sort_by: Optional[str] = Query('created_at', pa
                                  transaction_type: str = Query(None, pattern='^(sent|received)$'),
                                  transaction_status: str = Query('all', pattern='^(confirmed|pending|declined|all)$'),
                                  sender_id: int = Depends(get_current_user)):
-    ''''This endpoint retrieves transactions associated with the logged-in user. 
-    It allows filtering transactions based on parameters such as sorting criteria (sort_by), 
+    ''''This endpoint retrieves transactions associated with the logged-in user.
+    It allows filtering transactions based on parameters such as sorting criteria (sort_by),
     sorting order (order), transaction type (transaction_type),
-    and transaction status (transaction_status). 
-    The default sorting criterion is created_at in descending order (desc). 
-    The transaction type can be specified as either sent or received, and the transaction status 
-    can be confirmed, pending, declined, or all. 
-    The endpoint ensures authentication by depending on the get_current_user 
+    and transaction status (transaction_status).
+    The default sorting criterion is created_at in descending order (desc).
+    The transaction type can be specified as either sent or received, and the transaction status
+    can be confirmed, pending, declined, or all.
+    The endpoint ensures authentication by depending on the get_current_user
     dependency to retrieve the sender's ID.'''
     transactions = transactions_services.get_logged_user_transactions(sender_id, transaction_type, sort_by, order,
                                                                       transaction_status)
@@ -85,42 +85,42 @@ def accept_transaction(transaction_id: int, acceptation: AcceptTransaction, user
 
 
 
-@transaction_router.get('/filter', response_model=List[Transaction])
-def filter_transactions_endpoint(
-        start_date: Optional[date] = Query(None, description="Start date in the format YYYY-MM-DD"),
-        end_date: Optional[date] = Query(None, description="End date in the format YYYY-MM-DD"),
-        sender_id: Optional[int] = Query(None),
-        receiver_id: Optional[int] = Query(None),
-        transaction_type: str = Query('all', pattern='^(sent|received|all)$'),
-        user_id: int = Depends(get_current_user)
-        
-):
-    '''
-    Retrieves transactions based on specified filters for the logged-in user.
+# @transaction_router.get('/filter', response_model=List[Transaction])
+# def filter_transactions_endpoint(
+#         start_date: Optional[date] = Query(None, description="Start date in the format YYYY-MM-DD"),
+#         end_date: Optional[date] = Query(None, description="End date in the format YYYY-MM-DD"),
+#         sender_id: Optional[int] = Query(None),
+#         receiver_id: Optional[int] = Query(None),
+#         transaction_type: str = Query('all', pattern='^(sent|received|all)$'),
+#         user_id: int = Depends(get_current_user)
+#
+# ):
+#     '''
+#     Retrieves transactions based on specified filters for the logged-in user.
+#
+#     Parameters:
+#     - start_date (Optional[date]): Start date for filtering transactions (YYYY-MM-DD format).
+#     - end_date (Optional[date]): End date for filtering transactions (YYYY-MM-DD format).
+#     - sender_id (Optional[int]): ID of the sender for filtering transactions.
+#     - receiver_id (Optional[int]): ID of the receiver for filtering transactions.
+#     - transaction_type (str): Type of transactions to retrieve ('sent', 'received', or 'all').
+#     - user_id (int): ID of the logged-in user.
+#
+#     Returns:
+#     - List[Transaction]: List of transactions that match the specified filters.
+#     '''
+#     transactions = transactions_services.filter_transactions(
+#         user_id=user_id,
+#         start_date=start_date,
+#         end_date=end_date,
+#         sender_id=sender_id,
+#         receiver_id=receiver_id,
+#         transaction_type=transaction_type
+#     )
+#     return transactions
 
-    Parameters:
-    - start_date (Optional[date]): Start date for filtering transactions (YYYY-MM-DD format).
-    - end_date (Optional[date]): End date for filtering transactions (YYYY-MM-DD format).
-    - sender_id (Optional[int]): ID of the sender for filtering transactions.
-    - receiver_id (Optional[int]): ID of the receiver for filtering transactions.
-    - transaction_type (str): Type of transactions to retrieve ('sent', 'received', or 'all').
-    - user_id (int): ID of the logged-in user.
 
-    Returns:
-    - List[Transaction]: List of transactions that match the specified filters.
-    '''
-    transactions = transactions_services.filter_transactions(
-        user_id=user_id,
-        start_date=start_date,
-        end_date=end_date,
-        sender_id=sender_id,
-        receiver_id=receiver_id,
-        transaction_type=transaction_type
-    )
-    return transactions
-
-
-@transaction_router.get('/{user_id}')
+@transaction_router.get('/all/{user_id}')
 def get_all_transactions(user_id: int, logged_user_id: int = Depends(get_current_user), page: int = 1,
                          sent_or_received: str = None,
                          start_date: Optional[str] = None,
