@@ -56,9 +56,6 @@ async def add_token_to_request(request: Request, call_next):
     response = await call_next(request)
     return response
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn

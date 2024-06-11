@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #333;
+            padding: 1rem;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem;
+        }
+        .navbar a:hover {
+            background-color: #575757;
+        }
+        .dashboard-container {
+            margin: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/transactions">Transactions</a>
+            <a href="/cards">Cards</a>
+        </div>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="dashboard-container">
+        <h1>Welcome, {{ user.email }}!</h1>
+        <p>Here are your recent transactions:</p>
+        <!-- Add recent transactions, card details, etc. -->
+    </div>
+</body>
+</html>

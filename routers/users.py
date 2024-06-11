@@ -53,12 +53,17 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
     try:
         user = user_services.try_login(email, password)
         access_token = create_token(data={"user_id": user.id})
-        response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+        response = RedirectResponse(url="/dashboard", status_code=status.HTTP_302_FOUND)
         response.set_cookie(key="access_token", value=access_token, httponly=True)
         return response
     except HTTPException as e:
         return templates.TemplateResponse("login.html", {"request": request, "error": e.detail})
 
+@users_router.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    user_id = request.state.user_id
+    user = user_services.get_user(user_id)
+    return templates.TemplateResponse("dashboard.html", {"request": request, "user": user})
 
 @users_router.get('/profile/update', response_class=HTMLResponse)
 async def update_profile_form(request: Request):
@@ -92,6 +97,11 @@ def get_logged_user(request: Request):
         return templates.TemplateResponse("error.html", {"request": request, "error": "Not authenticated"})
     result = user_services.get_logged_user(user_id)
     return templates.TemplateResponse("profile.html", {"request": request, "user": result})
+
+
+@users_router.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request, user=Depends(get_current_user)):
+    return templates.TemplateResponse("dashboard.html", {"request": request, "user": user})
 
 
 # @users_router.get('/profile')
