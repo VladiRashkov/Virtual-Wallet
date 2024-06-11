@@ -22,9 +22,11 @@ Virtual Wallet is a web application designed to help users manage their budget. 
 
 How to interact with the API:
 - To run the FastAPI project locally, use Uvicorn as the server. Navigate to your project directory in the terminal and execute the following command: uvicorn main:app --reload. This command will start the FastAPI server in development mode with automatic reloading enabled. The application will be accessible at the URL:
-http://127.0.0.1:8000. By visiting this URL in your web browser, you can interact with your FastAPI application using SWAGGER.
+http://127.0.0.1:8000/docs. By visiting this URL in your web browser, you can interact with your FastAPI application using SWAGGER.
 
 - Once the server is running, you can find the documentation for each endpoint in the ReDoc interface at: http://127.0.0.1:8000/redoc
+
+- To navigate to the Front-end of the application, run the URL http://127.0.0.1:8000 - the Home Page of the application will be visualized and you will be able to either login or register in the app in order to continue to interact with other functionalities.
 
 [DB -> Supabase](https://supabase.com/dashboard/project/lcrwokhdqhyvbcjmuedq/editor/29471?sort=id%3Aasc)
 
