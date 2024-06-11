@@ -52,7 +52,6 @@ def update_card(card_id: int, card: CardUpdate, user_id: int = Depends(get_curre
 
 
 @cards_router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
-
 def delete_card(card_id: int, user_id: int = Depends(get_current_user)):
     try:
         deleted_card = cards_services.delete_card(card_id)
