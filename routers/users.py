@@ -15,10 +15,27 @@ templates = Jinja2Templates(directory="templates")
 users_router = APIRouter(prefix='/users', tags=['Users'])
 
 
-@users_router.get('/balance')
-def get_account_balance(logged_user_id: int = Depends(get_current_user)):
-    balance = user_services.get_user_balance(logged_user_id)
-    return balance
+@users_router.get('/balance', response_class=HTMLResponse)
+async def get_account_balance(request: Request):
+    logged_user_id = request.state.user_id
+    if not logged_user_id:
+        return templates.TemplateResponse('error.html',
+                                          {'request': request, 'error': 'Only registered users can see their balance!'})
+
+    elif is_admin(logged_user_id):
+        return templates.TemplateResponse('error.html',
+                                          {'request': request, 'error': 'Admins do not have balance!'})
+
+    balance_data = user_services.get_user_balance(logged_user_id)
+    balance = balance_data.balance
+
+    return templates.TemplateResponse('get_account_balance.html', {'request': request, 'balance': balance})
+
+
+# @users_router.get('/balance')
+# def get_account_balance(logged_user_id: int = Depends(get_current_user)):
+#     balance = user_services.get_user_balance(logged_user_id)
+#     return balance
 
 
 # @users_router.post('/register', status_code=status.HTTP_201_CREATED)
@@ -53,17 +70,18 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
     try:
         user = user_services.try_login(email, password)
         access_token = create_token(data={"user_id": user.id})
-        response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+        response = RedirectResponse(url="/menu", status_code=status.HTTP_302_FOUND)
         response.set_cookie(key="access_token", value=access_token, httponly=True)
         return response
     except HTTPException as e:
         return templates.TemplateResponse("login.html", {"request": request, "error": e.detail})
 
-@users_router.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    user_id = request.state.user_id
-    user = user_services.get_user(user_id)
-    return templates.TemplateResponse("dashboard.html", {"request": request, "user": user})
+
+# @users_router.get("/dashboard", response_class=HTMLResponse)
+# async def dashboard(request: Request):
+#     user_id = request.state.user_id
+#     user = user_services.get_user(user_id)
+#     return templates.TemplateResponse("dashboard.html", {"request": request, "user": user})
 
 @users_router.get('/profile/update', response_class=HTMLResponse)
 async def update_profile_form(request: Request):
@@ -99,10 +117,10 @@ def get_logged_user(request: Request):
     return templates.TemplateResponse("profile.html", {"request": request, "user": result})
 
 
-@users_router.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request, user=Depends(get_current_user)):
-    return templates.TemplateResponse("dashboard.html", {"request": request, "user": user})
-
+# @users_router.get("/dashboard", response_class=HTMLResponse)
+# async def dashboard(request: Request, user=Depends(get_current_user)):
+#     return templates.TemplateResponse("dashboard.html", {"request": request, "user": user})
+#
 
 # @users_router.get('/profile')
 # def get_logged_user(logged_user_id: int = Depends(get_current_user)):
@@ -267,8 +285,10 @@ def logout_current_user(request: Request):
         return templates.TemplateResponse('error.html',
                                           {'request': request, 'error': 'Only logged in users can logout!'})
     logout = logout_user(HTTPAuthorizationCredentials(scheme="Bearer", credentials=request.cookies.get('access_token')))
+
     response = templates.TemplateResponse('logout.html', {'request': request})
     response.delete_cookie('access_token')
+
     return response
 
 # @users_router.post('/logout', status_code=status.HTTP_200_OK)

@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Profile</title>
+    <title>Your Profile</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="profile-container">
-        <h1>User Profile</h1>
+        <h1>Your Profile</h1>
         {% if error %}
             <div class="alert-error">{{ error }}</div>
         {% else %}
@@ -19,6 +19,9 @@
                 <p><strong>Created At:</strong> {{ user.created_at }}</p>
             </div>
         {% endif %}
+        <div class = "go-to-menu-href">
+            <a href="/menu">Go to menu</a>
+        </div>
     </div>
 </body>
 </html>

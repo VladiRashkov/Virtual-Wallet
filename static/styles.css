@@ -17,6 +17,72 @@ body {
     100% { background-position: 0% 50%; }
 }
 
+.menu-container {
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    text-align: center;
+}
+
+.menu-container h1 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    color: white;
+}
+
+.menu-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 0;
+    list-style-type: none;
+    margin: 0;
+}
+
+.menu-list li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-list a {
+    display: block;
+    width: 100%;
+    padding: 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+    border: 1px solid white;
+    border-radius: 8px;
+    background-color: transparent;
+    transition: background-color 0.3s, color 0.3s;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+}
+
+.menu-list a:hover {
+    background-color: white;
+    color: black;
+}
+
+.balance-container a{
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+}
+
+
+
+.balance-container p{
+    display: flex;
+    justify-content: center;
+    color:white;
+    font-size: 20px;
+    padding: 10px;
+}
+
 .profile-container, .error-container, .login-container, .home-container, .confirm-registration-container {
     background-color: rgba(0, 0, 0, 0.8);
     padding: 30px;
@@ -270,6 +336,7 @@ table td {
 
 .pagination a:hover {
     background-color: white;
+    color:black;
 }
 
 
@@ -311,4 +378,35 @@ table td {
 .logout-button:hover {
     background-color: rgb(255, 255, 255);
     color: black;
+}
+
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.go-to-menu {
+    padding: 10px 20px;
+    border: 1px solid white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.go-to-menu:hover {
+    background-color: #white;
+}
+
+.go-to-menu-href {
+    margin-top: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.go-to-menu-href a {
+    color: white;
+    text-decoration: none;
+}
+
+.go-to-menu-href a:hover {
+    text-decoration: underline;
 }
