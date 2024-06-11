@@ -293,6 +293,7 @@ def accept_transaction(transaction_id: int, acceptation: str, logged_user_id: in
     return f"Acceptation status is in pending again!"
 
 
+
 # NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
 # def filter_transactions(
 #         user_id: int,
@@ -353,6 +354,8 @@ def accept_transaction(transaction_id: int, acceptation: str, logged_user_id: in
 #         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No transactions found matching the criteria')
 #
 #     return transactions_data
+
+
 
 
 def get_all_transactions(user_id, logged_user_id, page, sent_or_received, start_date,
