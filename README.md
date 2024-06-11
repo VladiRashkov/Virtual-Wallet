@@ -33,3 +33,6 @@ http://127.0.0.1:8000. By visiting this URL in your web browser, you can interac
 - Python
 - Supabase
 - FastAPI
+- Jinja2
+- HTML
+- CSS
