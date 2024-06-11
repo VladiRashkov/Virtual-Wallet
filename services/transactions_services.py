@@ -294,65 +294,68 @@ def accept_transaction(transaction_id: int, acceptation: str, logged_user_id: in
 
 
 
-def filter_transactions(
-        user_id: int,
-        start_date: Optional[date] = None,
-        end_date: Optional[date] = None,
-        sender_id: Optional[int] = None,
-        receiver_id: Optional[int] = None,
-        transaction_type: str = "all"
-) -> List[Transaction]:
-    """Filters transactions based on the given criteria."""
+# NOT COMPLETED ADDITIONAL CORRECTION REQUIRE IMPLEMENTATION
+# def filter_transactions(
+#         user_id: int,
+#         start_date: Optional[date] = None,
+#         end_date: Optional[date] = None,
+#         sender_id: Optional[int] = None,
+#         receiver_id: Optional[int] = None,
+#         transaction_type: str = "all"
+# ) -> List[Transaction]:
+#     """Filters transactions based on the given criteria."""
+#
+#     start_datetime = datetime.combine(start_date, time.min) if start_date else None
+#     end_datetime = datetime.combine(end_date, time.max) if end_date else None
+#
+#     query_builder = query.table('transactions').select('*')
+#
+#     if sender_id is None and receiver_id is None:
+#         if start_date:
+#             query_builder = query_builder.gte('created_at', start_datetime)
+#         if end_date:
+#             query_builder = query_builder.lte('created_at', end_datetime)
+#         if sender_id:
+#             query_builder = query_builder.eq('sender_id', user_id)
+#         if receiver_id:
+#             query_builder = query_builder.eq('receiver_id', user_id)
+#         if transaction_type == "sent":
+#             query_builder = query_builder.eq('sender_id', user_id)
+#         elif transaction_type == "received":
+#             query_builder = query_builder.eq('receiver_id', user_id)
+#
+#         transactions_data = query_builder.execute().data
+#
+#         if not transactions_data:
+#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                                 detail='No transactions found matching the criteria')
+#
+#         return transactions_data
+#
+#     if user_id not in [sender_id, receiver_id]:
+#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Unauthorized!')
+#
+#     if start_date:
+#         query_builder = query_builder.gte('created_at', start_datetime)
+#     if end_date:
+#         query_builder = query_builder.lte('created_at', end_datetime)
+#     if sender_id:
+#         query_builder = query_builder.eq('sender_id', sender_id)
+#     if receiver_id:
+#         query_builder = query_builder.eq('receiver_id', receiver_id)
+#     if transaction_type == "sent":
+#         query_builder = query_builder.eq('sender_id', user_id)
+#     elif transaction_type == "received":
+#         query_builder = query_builder.eq('receiver_id', user_id)
+#
+#     transactions_data = query_builder.execute().data
+#
+#     if not transactions_data:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No transactions found matching the criteria')
+#
+#     return transactions_data
 
-    start_datetime = datetime.combine(start_date, time.min) if start_date else None
-    end_datetime = datetime.combine(end_date, time.max) if end_date else None
 
-    query_builder = query.table('transactions').select('*')
-
-    if sender_id is None and receiver_id is None:
-        if start_date:
-            query_builder = query_builder.gte('created_at', start_datetime)
-        if end_date:
-            query_builder = query_builder.lte('created_at', end_datetime)
-        if sender_id:
-            query_builder = query_builder.eq('sender_id', user_id)
-        if receiver_id:
-            query_builder = query_builder.eq('receiver_id', user_id)
-        if transaction_type == "sent":
-            query_builder = query_builder.eq('sender_id', user_id)
-        elif transaction_type == "received":
-            query_builder = query_builder.eq('receiver_id', user_id)
-
-        transactions_data = query_builder.execute().data
-
-        if not transactions_data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail='No transactions found matching the criteria')
-
-        return transactions_data
-
-    if user_id not in [sender_id, receiver_id]:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Unauthorized!')
-
-    if start_date:
-        query_builder = query_builder.gte('created_at', start_datetime)
-    if end_date:
-        query_builder = query_builder.lte('created_at', end_datetime)
-    if sender_id:
-        query_builder = query_builder.eq('sender_id', sender_id)
-    if receiver_id:
-        query_builder = query_builder.eq('receiver_id', receiver_id)
-    if transaction_type == "sent":
-        query_builder = query_builder.eq('sender_id', user_id)
-    elif transaction_type == "received":
-        query_builder = query_builder.eq('receiver_id', user_id)
-
-    transactions_data = query_builder.execute().data
-
-    if not transactions_data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No transactions found matching the criteria')
-
-    return transactions_data
 
 
 def get_all_transactions(user_id, logged_user_id, page, sent_or_received, start_date,
