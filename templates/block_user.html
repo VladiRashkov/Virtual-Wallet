@@ -9,9 +9,9 @@
     <div class="block-user-container">
         <h1>Block/Unblock User</h1>
         {% if error %}
-            <div class="alert-error">{{ error }}</div>
+            <div class="alert alert-error">{{ error }}</div>
         {% elif success %}
-            <div class="alert-success">{{ success }}</div>
+            <div class="alert alert-success">{{ success }}</div>
         {% endif %}
         <form method="post" action="/users/block" class="block-user-form">
             <div class="form-group">
@@ -27,6 +27,10 @@
             </div>
             <button type="submit" class="block-user-button special-button">Submit</button>
         </form>
+        <div class = "go-to-menu-href">
+            <a href="/menu">Go to menu</a>
+        </div>
     </div>
+
 </body>
 </html>

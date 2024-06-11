@@ -15,6 +15,10 @@
                 <button type="submit" class="logout-button">Logout</button>
             </form>
         {% endif %}
+        <div class = "go-to-menu-href">
+            <a href="/menu">Go to menu</a>
+        </div>
+
     </div>
 
     <script>
@@ -34,11 +38,9 @@
             })
             .then(response => {
                 if (response.ok) {
-                    # delete access_token from cookies
                     deleteCookie('access_token');
-                    window.location.href = '/';  #redirect to home page
+                    window.location.href = '/';  // Redirect to home page
                 } else {
-                    # if has some errors, it shows this:
                     alert('Logout failed!');
                 }
             });

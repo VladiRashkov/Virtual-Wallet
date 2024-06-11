@@ -36,7 +36,6 @@
                     <th>Email</th>
                     <th>Phone Number</th>
                     <th>Registered</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -47,16 +46,6 @@
                         <td>{{ user.email }}</td>
                         <td>{{ user.phone_number }}</td>
                         <td>{{ user.is_registered }}</td>
-                        <td>
-                            <form method="post" action="/users/block_unblock">
-                                <input type="hidden" name="user_id" value="{{ user.id }}">
-                                {% if user.is_blocked %}
-                                    <button class="btn" type="submit" name="action" value="unblock">Unblock</button>
-                                {% else %}
-                                    <button class="btn" type="submit" name="action" value="block">Block</button>
-                                {% endif %}
-                            </form>
-                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -65,6 +54,10 @@
             <a href="/users/?page={{ page - 1 }}{% if username %}&username={{ username }}{% endif %}{% if email %}&email={{ email }}{% endif %}{% if phone_number %}&phone_number={{ phone_number }}{% endif %}{% if registered %}&registered={{ registered }}{% endif %}" {% if page <= 1 %}style="display:none;"{% endif %}>Previous</a>
             <a href="/users/?page={{ page + 1 }}{% if username %}&username={{ username }}{% endif %}{% if email %}&email={{ email }}{% endif %}{% if phone_number %}&phone_number={{ phone_number }}{% endif %}{% if registered %}&registered={{ registered }}{% endif %}">Next</a>
         </div>
+        <div class = "go-to-menu-href">
+            <a href="/menu">Go to menu</a>
+        </div>
     </div>
+
 </body>
 </html>
