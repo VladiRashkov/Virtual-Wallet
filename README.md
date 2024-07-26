@@ -20,6 +20,14 @@ Virtual Wallet is a web application designed to help users manage their budget. 
 
 ## 4.Hosting
 
+Required:
+pip install uvicorn
+pip install fastapi
+pip install python jose
+pip install supabase
+pip install passlib
+pip install apscheduler
+
 How to interact with the API:
 - To run the FastAPI project locally, use Uvicorn as the server. Navigate to your project directory in the terminal and execute the following command: uvicorn main:app --reload. This command will start the FastAPI server in development mode with automatic reloading enabled. The application will be accessible at the URL:
 http://127.0.0.1:8000/docs. By visiting this URL in your web browser, you can interact with your FastAPI application using SWAGGER.
