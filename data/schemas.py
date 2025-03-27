@@ -1,5 +1,5 @@
 import re
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import BaseModel, EmailStr, constr, conint, Field, validator
 from datetime import datetime, date
@@ -125,9 +125,9 @@ class GetUser(BaseModel):
     email: str
     phone_number: str
     is_admin: bool
-    created_at: datetime
+    created_at: Optional[datetime] = None 
     amount: float
-    is_registered: bool
+    is_registered: Optional[bool] = False
     is_blocked: bool
 
 

@@ -43,6 +43,14 @@ def create(username: str, password: str, email: str, phone_number: str) -> UserO
     if not is_valid_email(email):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email is not valid!')
 
+    print({
+    "username": username,
+    "password": hashed_password,
+    "email": email,
+    "phone_number": phone_number
+})
+    
+    
     try:
         # variable 'data'  will return a ORM object
         data = query.table('users').insert(

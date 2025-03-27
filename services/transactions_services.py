@@ -107,11 +107,12 @@ def transfer_money(sender_id: int, receiver_id: int, amount: float, category: st
         'id', sender_id).execute()
 
     transaction_data = {
-        'sender_id': sender_id,
+        'id': sender_id,
         'receiver_id': receiver_id,
         'amount': amount,
         'status': "pending",
-        'category': category
+        'category': category,
+        'created_at': datetime.now()
     }
     
     save_contact = {
@@ -119,7 +120,7 @@ def transfer_money(sender_id: int, receiver_id: int, amount: float, category: st
         'current_user': sender_id
     }
     
-    existing_contact = query.table('contacts').select('current_user', 'contact_name_id').eq('current_user',sender_id).eq('contact_name_id', receiver_id).execute()
+    existing_contact = query.table('contacts').select('id', 'receiver_id').eq('id',sender_id).eq('receiver_id', receiver_id).execute()
     if existing_contact.data:
         insert_transaction = query.table('transactions').insert(transaction_data).execute()
     else:

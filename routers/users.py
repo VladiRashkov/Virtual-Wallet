@@ -9,6 +9,7 @@ from fastapi import Depends
 from fastapi.templating import Jinja2Templates
 from data.helpers import is_admin
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import JSONResponse
 
 templates = Jinja2Templates(directory="templates")
 
@@ -75,7 +76,6 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
         return response
     except HTTPException as e:
         return templates.TemplateResponse("login.html", {"request": request, "error": e.detail})
-
 
 # @users_router.get("/dashboard", response_class=HTMLResponse)
 # async def dashboard(request: Request):
